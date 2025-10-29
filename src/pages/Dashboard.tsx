@@ -6,7 +6,6 @@ import Navigation from "@/components/Navigation";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import BuyerDashboard from "@/components/dashboard/BuyerDashboard";
 import SellerDashboard from "@/components/dashboard/SellerDashboard";
-import AdminDashboard from "@/components/dashboard/AdminDashboard";
 import { toast } from "sonner";
 
 const Dashboard = () => {
@@ -48,7 +47,14 @@ const Dashboard = () => {
       }
 
       if (roleResult.data) {
-        setIsAdmin(roleResult.data.some((r) => r.role === "admin"));
+        const isAdminUser = roleResult.data.some((r) => r.role === "admin");
+        setIsAdmin(isAdminUser);
+        
+        // Redirect admins to the admin portal
+        if (isAdminUser) {
+          navigate("/admin");
+          return;
+        }
       }
     } catch (error: any) {
       toast.error("Failed to load user data");
@@ -92,9 +98,7 @@ const Dashboard = () => {
           isAdmin={isAdmin}
           onModeSwitch={handleModeSwitch}
         />
-        {isAdmin ? (
-          <AdminDashboard />
-        ) : userMode === "buyer" ? (
+        {userMode === "buyer" ? (
           <BuyerDashboard />
         ) : (
           <SellerDashboard />
