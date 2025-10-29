@@ -97,44 +97,45 @@ const BuyerDashboard = () => {
         </div>
       ) : (
         <div className="space-y-8">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-accent to-accent-dark p-1">
-            <div className="bg-background/95 backdrop-blur-sm rounded-3xl p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-accent/10 rounded-full">
-                  <TrendingUp className="h-6 w-6 text-accent" />
-                </div>
-                <div>
-                  <h2 className="text-3xl font-bold">My Investment Portfolio</h2>
-                  <p className="text-muted-foreground">Track your tokenized real estate investments</p>
-                </div>
+          <div className="rounded-3xl bg-gradient-to-br from-primary/10 via-accent/10 to-accent-dark/10 p-8 border border-border">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-accent/10 rounded-full">
+                <TrendingUp className="h-6 w-6 text-accent" />
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-accent/10 to-accent/5 p-6 border border-accent/20">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full -mr-12 -mt-12" />
-                  <div className="relative">
-                    <div className="text-sm font-medium text-muted-foreground mb-2">Total Investment Value</div>
-                    <div className="text-4xl font-bold text-accent mb-1">${portfolio.total_value.toLocaleString()}</div>
-                    <p className="text-xs text-muted-foreground">Across all properties</p>
-                  </div>
-                </div>
-                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 p-6 border border-primary/20">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full -mr-12 -mt-12" />
-                  <div className="relative">
-                    <div className="text-sm font-medium text-muted-foreground mb-2">Total Tokens Owned</div>
-                    <div className="text-4xl font-bold text-primary mb-1">{portfolio.total_tokens.toLocaleString()}</div>
-                    <p className="text-xs text-muted-foreground">Real estate tokens</p>
-                  </div>
-                </div>
-                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-accent-dark/10 to-accent-dark/5 p-6 border border-accent-dark/20">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-accent-dark/10 rounded-full -mr-12 -mt-12" />
-                  <div className="relative">
-                    <div className="text-sm font-medium text-muted-foreground mb-2">Properties Invested</div>
-                    <div className="text-4xl font-bold text-accent-dark mb-1">{portfolio.properties_count}</div>
-                    <p className="text-xs text-muted-foreground">Diversified portfolio</p>
-                  </div>
-                </div>
+              <div>
+                <h2 className="text-3xl font-bold">My Investment Portfolio</h2>
+                <p className="text-muted-foreground">Track your tokenized real estate investments</p>
               </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="border-accent/20">
+                <CardHeader>
+                  <CardDescription>Total Investment Value</CardDescription>
+                  <CardTitle className="text-4xl text-accent">${portfolio.total_value.toLocaleString()}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-xs text-muted-foreground">Across all properties</p>
+                </CardContent>
+              </Card>
+              <Card className="border-primary/20">
+                <CardHeader>
+                  <CardDescription>Total Tokens Owned</CardDescription>
+                  <CardTitle className="text-4xl text-primary">{portfolio.total_tokens.toLocaleString()}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-xs text-muted-foreground">Real estate tokens</p>
+                </CardContent>
+              </Card>
+              <Card className="border-accent-dark/20">
+                <CardHeader>
+                  <CardDescription>Properties Invested</CardDescription>
+                  <CardTitle className="text-4xl text-accent-dark">{portfolio.properties_count}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-xs text-muted-foreground">Diversified portfolio</p>
+                </CardContent>
+              </Card>
             </div>
           </div>
 
