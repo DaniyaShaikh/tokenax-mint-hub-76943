@@ -14,16 +14,244 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      kyc_verifications: {
+        Row: {
+          company_name: string | null
+          created_at: string | null
+          id: string
+          rejection_reason: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+          verification_type: string
+          verified_at: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string | null
+          id?: string
+          rejection_reason?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+          verification_type: string
+          verified_at?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string | null
+          id?: string
+          rejection_reason?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+          verification_type?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string | null
+          user_mode: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+          user_mode?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+          user_mode?: string | null
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          address: string
+          admin_notes: string | null
+          created_at: string | null
+          description: string | null
+          expected_tokens: number | null
+          highlights: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          owner_id: string
+          ownership_documents: Json | null
+          property_images: Json | null
+          property_type: string
+          rejection_reason: string | null
+          status: string | null
+          title: string
+          updated_at: string | null
+          valuation: number
+        }
+        Insert: {
+          address: string
+          admin_notes?: string | null
+          created_at?: string | null
+          description?: string | null
+          expected_tokens?: number | null
+          highlights?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          owner_id: string
+          ownership_documents?: Json | null
+          property_images?: Json | null
+          property_type: string
+          rejection_reason?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          valuation: number
+        }
+        Update: {
+          address?: string
+          admin_notes?: string | null
+          created_at?: string | null
+          description?: string | null
+          expected_tokens?: number | null
+          highlights?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          owner_id?: string
+          ownership_documents?: Json | null
+          property_images?: Json | null
+          property_type?: string
+          rejection_reason?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          valuation?: number
+        }
+        Relationships: []
+      }
+      property_tokens: {
+        Row: {
+          available_tokens: number
+          created_at: string | null
+          id: string
+          price_per_token: number
+          property_id: string
+          total_tokens: number
+          updated_at: string | null
+        }
+        Insert: {
+          available_tokens: number
+          created_at?: string | null
+          id?: string
+          price_per_token: number
+          property_id: string
+          total_tokens: number
+          updated_at?: string | null
+        }
+        Update: {
+          available_tokens?: number
+          created_at?: string | null
+          id?: string
+          price_per_token?: number
+          property_id?: string
+          total_tokens?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_tokens_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      token_purchases: {
+        Row: {
+          buyer_id: string
+          id: string
+          price_per_token: number
+          property_id: string
+          purchased_at: string | null
+          tokens_purchased: number
+          total_amount: number
+        }
+        Insert: {
+          buyer_id: string
+          id?: string
+          price_per_token: number
+          property_id: string
+          purchased_at?: string | null
+          tokens_purchased: number
+          total_amount: number
+        }
+        Update: {
+          buyer_id?: string
+          id?: string
+          price_per_token?: number
+          property_id?: string
+          purchased_at?: string | null
+          tokens_purchased?: number
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "token_purchases_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +378,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
