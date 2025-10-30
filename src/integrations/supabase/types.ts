@@ -138,7 +138,15 @@ export type Database = {
           updated_at?: string | null
           valuation?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "properties_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       property_tokens: {
         Row: {
