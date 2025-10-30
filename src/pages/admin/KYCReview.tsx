@@ -42,6 +42,7 @@ interface KYCVerification {
       lastName?: string;
       dateOfBirth?: string;
       nationality?: string;
+      phoneNumber?: string;
     };
     address?: {
       street?: string;
@@ -317,6 +318,20 @@ const KYCReview = () => {
                   <p className="font-medium">{data.personalInfo.nationality || "N/A"}</p>
                 )}
               </div>
+              <div>
+                <Label className="text-sm text-muted-foreground">Phone Number</Label>
+                {editMode ? (
+                  <Input
+                    value={editedData.personalInfo?.phoneNumber || ""}
+                    onChange={(e) => setEditedData({
+                      ...editedData,
+                      personalInfo: { ...editedData.personalInfo, phoneNumber: e.target.value }
+                    })}
+                  />
+                ) : (
+                  <p className="font-medium">{data.personalInfo.phoneNumber || "N/A"}</p>
+                )}
+              </div>
             </CardContent>
           </Card>
         )}
@@ -332,16 +347,46 @@ const KYCReview = () => {
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Company Name</p>
-                <p className="font-medium">{data.companyInfo.name || "N/A"}</p>
+                <Label className="text-sm text-muted-foreground">Company Name</Label>
+                {editMode ? (
+                  <Input
+                    value={editedData.companyInfo?.name || ""}
+                    onChange={(e) => setEditedData({
+                      ...editedData,
+                      companyInfo: { ...editedData.companyInfo, name: e.target.value }
+                    })}
+                  />
+                ) : (
+                  <p className="font-medium">{data.companyInfo.name || "N/A"}</p>
+                )}
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Registration Number</p>
-                <p className="font-medium">{data.companyInfo.registrationNumber || "N/A"}</p>
+                <Label className="text-sm text-muted-foreground">Registration Number</Label>
+                {editMode ? (
+                  <Input
+                    value={editedData.companyInfo?.registrationNumber || ""}
+                    onChange={(e) => setEditedData({
+                      ...editedData,
+                      companyInfo: { ...editedData.companyInfo, registrationNumber: e.target.value }
+                    })}
+                  />
+                ) : (
+                  <p className="font-medium">{data.companyInfo.registrationNumber || "N/A"}</p>
+                )}
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Tax ID</p>
-                <p className="font-medium">{data.companyInfo.taxId || "N/A"}</p>
+                <Label className="text-sm text-muted-foreground">Tax ID</Label>
+                {editMode ? (
+                  <Input
+                    value={editedData.companyInfo?.taxId || ""}
+                    onChange={(e) => setEditedData({
+                      ...editedData,
+                      companyInfo: { ...editedData.companyInfo, taxId: e.target.value }
+                    })}
+                  />
+                ) : (
+                  <p className="font-medium">{data.companyInfo.taxId || "N/A"}</p>
+                )}
               </div>
             </CardContent>
           </Card>
