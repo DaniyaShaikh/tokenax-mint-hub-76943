@@ -15,6 +15,12 @@ import PropertyEvaluation from "./pages/admin/PropertyEvaluation";
 import TokenManagement from "./pages/admin/TokenManagement";
 import UserManagement from "./pages/admin/UserManagement";
 import Analytics from "./pages/admin/Analytics";
+import BuyerLayout from "./components/buyer/BuyerLayout";
+import BuyerDashboard from "./pages/buyer/BuyerDashboard";
+import Transactions from "./pages/buyer/Transactions";
+import Accounts from "./pages/buyer/Accounts";
+import Marketplace from "./pages/buyer/Marketplace";
+import Investments from "./pages/buyer/Investments";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +35,13 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/list-property" element={<ListProperty />} />
+          <Route path="/buyer" element={<BuyerLayout />}>
+            <Route path="dashboard" element={<BuyerDashboard />} />
+            <Route path="transactions" element={<Transactions />} />
+            <Route path="accounts" element={<Accounts />} />
+            <Route path="marketplace" element={<Marketplace />} />
+            <Route path="investments" element={<Investments />} />
+          </Route>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminOverview />} />
             <Route path="kyc" element={<KYCReview />} />
