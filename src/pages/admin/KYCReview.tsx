@@ -282,7 +282,7 @@ const KYCReview = () => {
   const renderVerificationDetails = (kyc: KYCVerification) => {
     const isKYB = kyc.verification_type === "kyb";
     const data = editMode ? editedData : kyc.verification_data;
-    const canEdit = kyc.status === "rejected";
+    const canEdit = kyc.status === "needs_revision";
 
     return (
       <div className="space-y-6">
@@ -782,12 +782,11 @@ const KYCReview = () => {
               <div className="space-y-3">
                 <div className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
                   <p className="text-sm text-amber-900 dark:text-amber-100 mb-2">
-                    <strong>Admin Override:</strong> You're editing user data and can upload missing documents.
+                    <strong>Admin Intervention for "Needs Revision":</strong> Upload missing documents or fix user data, then choose an action below.
                   </p>
                   <ul className="text-xs text-amber-800 dark:text-amber-200 space-y-1 ml-4 list-disc">
-                    <li>Upload missing documents above</li>
-                    <li>Click "Upload & Approve" to approve immediately with uploaded docs</li>
-                    <li>Or click "Request Revision" to ask user to resubmit</li>
+                    <li><strong>Upload & Approve:</strong> Fix issues yourself and approve immediately</li>
+                    <li><strong>Request Revision:</strong> Send back to user with notes on what to fix</li>
                   </ul>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -817,6 +816,18 @@ const KYCReview = () => {
                     Request Revision
                   </Button>
                 </div>
+              </div>
+            ) : kyc.status === "rejected" ? (
+              <div className="p-4 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-900 dark:text-red-100">
+                  <strong>Rejected - Final Decision:</strong> This application has been permanently rejected. No further actions can be taken. User must start a new application if needed.
+                </p>
+                {kyc.rejection_reason && (
+                  <div className="mt-3 pt-3 border-t border-red-200 dark:border-red-800">
+                    <p className="text-xs font-medium text-red-800 dark:text-red-200 mb-1">Rejection Reason:</p>
+                    <p className="text-sm text-red-700 dark:text-red-300">{kyc.rejection_reason}</p>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-3">
