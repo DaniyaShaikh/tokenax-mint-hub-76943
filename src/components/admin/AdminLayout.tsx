@@ -9,6 +9,7 @@ import {
   BarChart3,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -55,6 +56,19 @@ const AdminLayout = () => {
       navigate("/dashboard");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast.success("Logged out successfully");
+      navigate("/auth");
+    } catch (error: any) {
+      console.error("Error logging out:", error);
+      toast.error("Failed to logout");
     }
   };
 
@@ -160,11 +174,21 @@ const AdminLayout = () => {
 
           {/* Footer */}
           {sidebarOpen && (
-            <div className="p-4 border-t border-border/50">
+            <div className="p-4 border-t border-border/50 space-y-3">
               <div className="p-4 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-xl">
                 <p className="text-xs font-semibold text-primary mb-1">Admin Access</p>
                 <p className="text-xs text-muted-foreground">Full system control</p>
               </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
             </div>
           )}
         </div>

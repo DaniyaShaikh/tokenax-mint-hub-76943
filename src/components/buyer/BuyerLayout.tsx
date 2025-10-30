@@ -9,6 +9,7 @@ import {
   Menu,
   X,
   RefreshCw,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -82,6 +83,19 @@ const BuyerLayout = () => {
       }
     } catch (error: any) {
       toast.error("Failed to switch mode");
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast.success("Logged out successfully");
+      navigate("/auth");
+    } catch (error: any) {
+      console.error("Error logging out:", error);
+      toast.error("Failed to logout");
     }
   };
 
@@ -193,6 +207,16 @@ const BuyerLayout = () => {
               >
                 <RefreshCw className="h-4 w-4" />
                 Switch to Seller Mode
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
               </Button>
             </div>
           )}
