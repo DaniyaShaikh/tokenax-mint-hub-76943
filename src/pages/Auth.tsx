@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import tokenaxLogo from "@/assets/tokenax-logo.png";
+import { Layers } from "lucide-react";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -68,7 +68,12 @@ const Auth = () => {
       <Card className="w-full max-w-md mx-4">
         <CardHeader className="space-y-4">
           <div className="flex justify-center">
-            <img src={tokenaxLogo} alt="TokenaX" className="h-12 w-auto" />
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-lg blur-md opacity-60" />
+              <div className="relative z-10 p-3 bg-gradient-to-r from-primary to-secondary rounded-lg">
+                <Layers className="h-8 w-8 text-white" />
+              </div>
+            </div>
           </div>
           <div className="text-center">
             <CardTitle className="text-2xl">{isLogin ? "Welcome Back" : "Create Account"}</CardTitle>

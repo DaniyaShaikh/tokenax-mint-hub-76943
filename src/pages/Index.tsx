@@ -3,6 +3,7 @@ import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import CTASection from "@/components/CTASection";
+import { Layers } from "lucide-react";
 
 const Index = () => {
   return (
@@ -17,12 +18,10 @@ const Index = () => {
       <footer className="bg-card border-t border-border py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="mb-4">
-              <img 
-                src="/lovable-uploads/b6da2701-5eb5-463e-8f3c-14e85ec82e3b.png" 
-                alt="TokenaX" 
-                className="h-8 w-auto mx-auto opacity-80"
-              />
+            <div className="mb-4 flex justify-center">
+              <div className="p-2 bg-gradient-to-r from-primary to-secondary rounded-lg">
+                <Layers className="h-6 w-6 text-white" />
+              </div>
             </div>
             <p className="text-sm text-muted-foreground">
               © 2025 TokenaX. All rights reserved.

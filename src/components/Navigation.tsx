@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
-import tokenaxLogo from "@/assets/tokenax-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { LogOut } from "lucide-react";
+import { LogOut, Layers } from "lucide-react";
 
 const Navigation = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -33,13 +32,12 @@ const Navigation = () => {
             className="flex items-center space-x-3 group"
           >
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-lg blur-sm opacity-50 group-hover:opacity-75 transition-opacity" />
-              <img 
-                src={tokenaxLogo} 
-                alt="TokenaX" 
-                className="h-10 w-auto relative z-10"
-              />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-lg blur-md opacity-60 group-hover:opacity-100 transition-opacity" />
+              <div className="relative z-10 p-2 bg-gradient-to-r from-primary to-secondary rounded-lg">
+                <Layers className="h-6 w-6 text-white" />
+              </div>
             </div>
+            <span className="text-xl font-bold gradient-text">TokenaX</span>
           </a>
 
           {!isAuthenticated && (
