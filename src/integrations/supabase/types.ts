@@ -16,35 +16,44 @@ export type Database = {
     Tables: {
       kyc_verifications: {
         Row: {
+          admin_notes: string | null
           company_name: string | null
           created_at: string | null
           id: string
           rejection_reason: string | null
+          review_status: string | null
           status: string | null
           updated_at: string | null
           user_id: string
+          verification_data: Json | null
           verification_type: string
           verified_at: string | null
         }
         Insert: {
+          admin_notes?: string | null
           company_name?: string | null
           created_at?: string | null
           id?: string
           rejection_reason?: string | null
+          review_status?: string | null
           status?: string | null
           updated_at?: string | null
           user_id: string
+          verification_data?: Json | null
           verification_type: string
           verified_at?: string | null
         }
         Update: {
+          admin_notes?: string | null
           company_name?: string | null
           created_at?: string | null
           id?: string
           rejection_reason?: string | null
+          review_status?: string | null
           status?: string | null
           updated_at?: string | null
           user_id?: string
+          verification_data?: Json | null
           verification_type?: string
           verified_at?: string | null
         }

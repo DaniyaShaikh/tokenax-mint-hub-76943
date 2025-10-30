@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Clock, XCircle, Shield } from "lucide-react";
+import { CheckCircle, Clock, XCircle, Shield, AlertCircle } from "lucide-react";
 import KYCSteps from "./KYCSteps";
 
 interface KYCVerificationProps {
@@ -20,6 +20,8 @@ const KYCVerification = ({ currentStatus, onStatusChange }: KYCVerificationProps
         return <CheckCircle className="h-8 w-8 text-green-500" />;
       case "rejected":
         return <XCircle className="h-8 w-8 text-destructive" />;
+      case "needs_revision":
+        return <AlertCircle className="h-8 w-8 text-warning" />;
       case "pending":
         return <Clock className="h-8 w-8 text-yellow-500" />;
       default:
@@ -32,9 +34,10 @@ const KYCVerification = ({ currentStatus, onStatusChange }: KYCVerificationProps
       pending: "default",
       approved: "default",
       rejected: "destructive",
+      needs_revision: "secondary",
     };
     return currentStatus ? (
-      <Badge variant={variants[currentStatus] || "secondary"}>{currentStatus}</Badge>
+      <Badge variant={variants[currentStatus] || "secondary"}>{currentStatus.replace("_", " ")}</Badge>
     ) : null;
   };
 
@@ -65,12 +68,14 @@ const KYCVerification = ({ currentStatus, onStatusChange }: KYCVerificationProps
               ? "Your verification is under review"
               : currentStatus === "rejected"
               ? "Your verification was rejected"
+              : currentStatus === "needs_revision"
+              ? "Your verification needs revision - please resubmit"
               : "Complete KYC/KYB to start listing properties"}
           </CardDescription>
           {getStatusBadge()}
         </CardHeader>
         <CardContent>
-          {!currentStatus || currentStatus === "rejected" ? (
+          {!currentStatus || currentStatus === "rejected" || currentStatus === "needs_revision" ? (
             <div className="space-y-6">
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground text-center">

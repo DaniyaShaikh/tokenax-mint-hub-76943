@@ -56,11 +56,41 @@ const KYCSteps = ({ verificationType, onComplete }: KYCStepsProps) => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error("Not authenticated");
 
+      // Prepare verification data with all collected information
+      const verificationData = {
+        personalInfo: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          dateOfBirth: formData.dateOfBirth,
+          nationality: formData.nationality,
+        },
+        address: {
+          street: formData.address,
+          city: formData.city,
+          postalCode: formData.postalCode,
+          country: formData.country,
+        },
+        documents: {
+          idDocument: formData.idDocument?.name || null,
+          proofOfAddress: formData.proofOfAddress?.name || null,
+          selfie: formData.selfie?.name || null,
+        },
+        ...(verificationType === "kyb" && {
+          companyInfo: {
+            name: formData.companyName,
+            registrationNumber: formData.registrationNumber,
+            taxId: formData.taxId,
+          },
+        }),
+        submittedAt: new Date().toISOString(),
+      };
+
       const { error } = await supabase.from("kyc_verifications").insert({
         user_id: user.data.user.id,
         verification_type: verificationType,
         company_name: verificationType === "kyb" ? formData.companyName : null,
         status: "pending",
+        verification_data: verificationData,
       });
 
       if (error) throw error;
