@@ -52,7 +52,7 @@ const HowItWorksSection = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
           {/* Connecting lines for desktop */}
-          <div className="hidden lg:block absolute top-1/4 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-secondary to-accent -z-10" />
+          <div className="hidden lg:block absolute top-1/4 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary -z-10" />
           
           {steps.map((step, index) => (
             <Card 
@@ -72,7 +72,7 @@ const HowItWorksSection = () => {
                   </div>
                   
                   {/* Step number badge */}
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-secondary to-accent rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">
                     {index + 1}
                   </div>
                 </div>

@@ -17,21 +17,21 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 220 15% 10%;
 
-    --primary: 214 85% 40%;
+    --primary: 214 85% 45%;
     --primary-foreground: 0 0% 100%;
     
-    --primary-dark: 214 90% 30%;
-    --primary-light: 214 75% 55%;
+    --primary-dark: 214 85% 35%;
+    --primary-light: 214 80% 60%;
 
-    --secondary: 215 20% 25%;
+    --secondary: 214 70% 55%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 220 15% 95%;
-    --muted-foreground: 220 10% 45%;
+    --muted-foreground: 220 10% 50%;
 
-    --accent: 187 85% 45%;
+    --accent: 214 85% 45%;
     --accent-foreground: 0 0% 100%;
-    --accent-light: 187 80% 95%;
+    --accent-light: 214 80% 95%;
 
     --success: 145 65% 50%;
     --success-foreground: 0 0% 100%;
@@ -48,11 +48,11 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
     
-    --gradient-primary: linear-gradient(135deg, hsl(214, 85%, 40%) 0%, hsl(215, 20%, 25%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(214, 90%, 30%) 0%, hsl(187, 85%, 45%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(214, 85%, 45%) 0%, hsl(214, 70%, 55%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(214, 85%, 35%) 0%, hsl(214, 70%, 55%) 100%);
     --gradient-card: linear-gradient(to bottom, hsl(0, 0%, 100%) 0%, hsl(220, 20%, 99%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(187, 85%, 45%) 0%, hsl(214, 85%, 40%) 100%);
-    --gradient-mesh: radial-gradient(at 40% 20%, hsl(214, 85%, 40%) 0px, transparent 50%), radial-gradient(at 80% 0%, hsl(215, 20%, 25%) 0px, transparent 50%), radial-gradient(at 0% 50%, hsl(187, 85%, 45%) 0px, transparent 50%);
+    --gradient-accent: linear-gradient(135deg, hsl(214, 70%, 55%) 0%, hsl(214, 85%, 45%) 100%);
+    --gradient-mesh: radial-gradient(at 40% 20%, hsl(214, 85%, 45%) 0px, transparent 50%), radial-gradient(at 80% 0%, hsl(214, 70%, 55%) 0px, transparent 50%), radial-gradient(at 0% 50%, hsl(214, 85%, 60%) 0px, transparent 50%);
     --shadow-sm: 0 1px 2px 0 hsl(220, 15%, 10% / 0.05);
     --shadow-md: 0 4px 6px -1px hsl(220, 15%, 10% / 0.1), 0 2px 4px -2px hsl(220, 15%, 10% / 0.1);
     --shadow-lg: 0 10px 15px -3px hsl(220, 15%, 10% / 0.1), 0 4px 6px -4px hsl(220, 15%, 10% / 0.1);
@@ -87,16 +87,16 @@ All colors MUST be HSL.
     --popover: 220 20% 12%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 214 85% 50%;
+    --primary: 214 85% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 20% 35%;
+    --secondary: 214 70% 65%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 220 15% 20%;
     --muted-foreground: 220 10% 65%;
 
-    --accent: 187 85% 55%;
+    --accent: 214 85% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 75% 55%;
