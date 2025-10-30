@@ -27,7 +27,8 @@ const CTASection = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
                 <Button 
                   size="lg" 
-                  className="group text-lg px-10 py-7 rounded-full bg-white text-primary hover:bg-white/90 hover:shadow-2xl hover:shadow-white/30 hover:scale-105 transition-all"
+                  className="group text-lg px-10 py-7 rounded-full bg-accent text-white hover:bg-accent/90 hover:shadow-2xl hover:shadow-accent/50 hover:scale-105 transition-all font-semibold"
+                  onClick={() => window.location.href = '/auth'}
                 >
                   Create Account
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
