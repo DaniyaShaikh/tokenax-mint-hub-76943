@@ -64,12 +64,40 @@ const SellerDashboard = () => {
         .eq("owner_id", user.data.user.id)
         .order("created_at", { ascending: false });
 
-      if (propertiesData) {
+      if (propertiesData && propertiesData.length > 0) {
         const mappedProperties = propertiesData.map((prop: any) => ({
           ...prop,
           property_tokens: prop.property_tokens ? [prop.property_tokens] : undefined
         }));
         setProperties(mappedProperties);
+      } else {
+        // Show sample data for new users
+        const sampleProperties: Property[] = [
+          {
+            id: "sample-1",
+            title: "Luxury Downtown Apartment",
+            status: "tokenized",
+            valuation: 850000,
+            property_tokens: [{
+              total_tokens: 10000,
+              available_tokens: 3500,
+              price_per_token: 85
+            }]
+          },
+          {
+            id: "sample-2",
+            title: "Commercial Office Space",
+            status: "pending",
+            valuation: 1200000
+          },
+          {
+            id: "sample-3",
+            title: "Suburban Family Home",
+            status: "draft",
+            valuation: 450000
+          }
+        ];
+        setProperties(sampleProperties);
       }
     } catch (error: any) {
       console.error("Error loading data:", error);

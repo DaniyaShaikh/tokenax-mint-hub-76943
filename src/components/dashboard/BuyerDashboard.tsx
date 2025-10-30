@@ -60,13 +60,48 @@ const BuyerDashboard = () => {
         .select(`*, property_tokens (total_tokens, available_tokens, price_per_token)`)
         .eq("status", "tokenized");
 
-      if (propertiesData) {
+      if (propertiesData && propertiesData.length > 0) {
         const mappedProperties = propertiesData.map((prop: any) => ({
           ...prop,
           property_tokens: prop.property_tokens ? [prop.property_tokens] : [],
           property_images: Array.isArray(prop.property_images) ? prop.property_images : []
         }));
         setProperties(mappedProperties);
+      } else {
+        // Show sample properties for new users
+        const sampleProperties: Property[] = [
+          {
+            id: "sample-1",
+            title: "Luxury Downtown Apartment",
+            address: "123 Main Street, New York, NY",
+            valuation: 850000,
+            property_type: "Residential",
+            property_images: [],
+            description: "Modern luxury apartment in the heart of downtown with stunning city views and premium amenities.",
+            highlights: "Prime location, 24/7 concierge, rooftop pool, gym access",
+            property_tokens: [{
+              total_tokens: 10000,
+              available_tokens: 3500,
+              price_per_token: 85
+            }]
+          },
+          {
+            id: "sample-2",
+            title: "Commercial Office Complex",
+            address: "456 Business Ave, Chicago, IL",
+            valuation: 1200000,
+            property_type: "Commercial",
+            property_images: [],
+            description: "Grade A office space in prime business district with excellent transport links.",
+            highlights: "High occupancy rate, premium tenants, modern facilities",
+            property_tokens: [{
+              total_tokens: 15000,
+              available_tokens: 8000,
+              price_per_token: 80
+            }]
+          }
+        ];
+        setProperties(sampleProperties);
       }
 
       const { data: purchases } = await supabase
@@ -98,6 +133,25 @@ const BuyerDashboard = () => {
           totalTokens,
           propertiesCount: uniqueProperties.size,
           investments: Array.from(investmentMap.values()),
+        });
+      } else {
+        // Show sample portfolio for new users
+        setPortfolio({
+          totalValue: 42500,
+          totalTokens: 500,
+          propertiesCount: 2,
+          investments: [
+            {
+              property_title: "Tech Hub Office Building",
+              tokens: 300,
+              value: 25500
+            },
+            {
+              property_title: "Beachfront Condo Complex",
+              tokens: 200,
+              value: 17000
+            }
+          ]
         });
       }
     } catch (error: any) {
