@@ -1,7 +1,25 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield, TrendingUp, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const HeroSection = () => {
+  const assetTypes = [
+    "Real Estate",
+    "Physical Assets",
+    "Digital Assets",
+    "Commodities",
+    "Art & Collectibles",
+    "Precious Metals"
+  ];
+  
+  const [currentAssetIndex, setCurrentAssetIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentAssetIndex((prev) => (prev + 1) % assetTypes.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Gradient Background */}
@@ -19,19 +37,21 @@ const HeroSection = () => {
           <div className="inline-flex items-center gap-2 mb-6 px-5 py-2.5 bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-sm rounded-full border border-primary/20 shadow-lg shadow-primary/5">
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-sm font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Institutional-Grade Asset Tokenization Platform
+              Universal Asset Tokenization Platform
             </span>
           </div>
           
           <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
-            <span className="gradient-text">Tokenize Real Estate</span>
+            <span className="gradient-text">Tokenize </span>
             <br />
-            <span className="text-foreground">Digitally</span>
+            <span className="gradient-text transition-all duration-500 inline-block min-w-[400px] text-left">
+              {assetTypes[currentAssetIndex]}
+            </span>
           </h1>
           
           <p className="text-xl sm:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
-            Transform physical properties into digital tokens with blockchain security. 
-            Enable fractional ownership, instant trading, and complete transparency.
+            Transform any physical or digital asset into tradeable tokens with blockchain security. 
+            Tokenize, trade, and manage any asset with fractional ownership and complete transparency.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
