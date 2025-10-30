@@ -20,6 +20,11 @@ import Transactions from "./pages/buyer/Transactions";
 import Accounts from "./pages/buyer/Accounts";
 import Marketplace from "./pages/buyer/Marketplace";
 import Investments from "./pages/buyer/Investments";
+import SellerLayout from "./components/seller/SellerLayout";
+import SellerDashboard from "./pages/seller/SellerDashboard";
+import Properties from "./pages/seller/Properties";
+import Earnings from "./pages/seller/Earnings";
+import Documents from "./pages/seller/Documents";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +43,12 @@ const App = () => (
             <Route path="accounts" element={<Accounts />} />
             <Route path="marketplace" element={<Marketplace />} />
             <Route path="investments" element={<Investments />} />
+          </Route>
+          <Route path="/seller" element={<SellerLayout />}>
+            <Route index element={<SellerDashboard />} />
+            <Route path="properties" element={<Properties />} />
+            <Route path="earnings" element={<Earnings />} />
+            <Route path="documents" element={<Documents />} />
           </Route>
           <Route path="/list-property" element={<ListProperty />} />
           <Route path="/admin" element={<AdminLayout />}>
