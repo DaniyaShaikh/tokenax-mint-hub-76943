@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -18,7 +20,9 @@ import {
   Eye,
   MapPin,
   Shield,
-  Clock
+  Clock,
+  Edit,
+  Upload
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -70,6 +74,8 @@ const KYCReview = () => {
   const [selectedKYC, setSelectedKYC] = useState<KYCVerification | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
+  const [editMode, setEditMode] = useState(false);
+  const [editedData, setEditedData] = useState<any>(null);
 
   useEffect(() => {
     loadVerifications();
@@ -83,7 +89,7 @@ const KYCReview = () => {
           *,
           profiles (email, full_name)
         `)
-        .eq("status", activeTab)
+        .eq("review_status", activeTab)
         .order("created_at", { ascending: false });
 
       if (data) {
@@ -109,6 +115,7 @@ const KYCReview = () => {
         .from("kyc_verifications")
         .update({
           status: action,
+          review_status: action,
           verified_at: action === "approved" ? new Date().toISOString() : null,
           rejection_reason: action === "rejected" ? rejectionReason : null,
           admin_notes: adminNotes || null,
@@ -121,9 +128,46 @@ const KYCReview = () => {
       setSelectedKYC(null);
       setAdminNotes("");
       setRejectionReason("");
+      setEditMode(false);
+      setEditedData(null);
       loadVerifications();
     } catch (error: any) {
       toast.error(error.message);
+    }
+  };
+
+  const handleResubmit = async () => {
+    if (!selectedKYC || !editedData) return;
+
+    try {
+      const { error } = await supabase
+        .from("kyc_verifications")
+        .update({
+          status: "pending",
+          review_status: "pending",
+          verification_data: editedData,
+          admin_notes: adminNotes || null,
+          rejection_reason: null,
+        })
+        .eq("id", selectedKYC.id);
+
+      if (error) throw error;
+
+      toast.success("Verification resubmitted for review");
+      setSelectedKYC(null);
+      setAdminNotes("");
+      setEditMode(false);
+      setEditedData(null);
+      loadVerifications();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const enableEditMode = () => {
+    if (selectedKYC?.verification_data) {
+      setEditedData(JSON.parse(JSON.stringify(selectedKYC.verification_data)));
+      setEditMode(true);
     }
   };
 
@@ -148,7 +192,8 @@ const KYCReview = () => {
 
   const renderVerificationDetails = (kyc: KYCVerification) => {
     const isKYB = kyc.verification_type === "kyb";
-    const data = kyc.verification_data;
+    const data = editMode ? editedData : kyc.verification_data;
+    const canEdit = kyc.status === "rejected";
 
     return (
       <div className="space-y-6">
@@ -216,20 +261,61 @@ const KYCReview = () => {
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">First Name</p>
-                <p className="font-medium">{data.personalInfo.firstName || "N/A"}</p>
+                <Label className="text-sm text-muted-foreground">First Name</Label>
+                {editMode ? (
+                  <Input
+                    value={editedData.personalInfo?.firstName || ""}
+                    onChange={(e) => setEditedData({
+                      ...editedData,
+                      personalInfo: { ...editedData.personalInfo, firstName: e.target.value }
+                    })}
+                  />
+                ) : (
+                  <p className="font-medium">{data.personalInfo.firstName || "N/A"}</p>
+                )}
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Last Name</p>
-                <p className="font-medium">{data.personalInfo.lastName || "N/A"}</p>
+                <Label className="text-sm text-muted-foreground">Last Name</Label>
+                {editMode ? (
+                  <Input
+                    value={editedData.personalInfo?.lastName || ""}
+                    onChange={(e) => setEditedData({
+                      ...editedData,
+                      personalInfo: { ...editedData.personalInfo, lastName: e.target.value }
+                    })}
+                  />
+                ) : (
+                  <p className="font-medium">{data.personalInfo.lastName || "N/A"}</p>
+                )}
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Date of Birth</p>
-                <p className="font-medium">{data.personalInfo.dateOfBirth || "N/A"}</p>
+                <Label className="text-sm text-muted-foreground">Date of Birth</Label>
+                {editMode ? (
+                  <Input
+                    type="date"
+                    value={editedData.personalInfo?.dateOfBirth || ""}
+                    onChange={(e) => setEditedData({
+                      ...editedData,
+                      personalInfo: { ...editedData.personalInfo, dateOfBirth: e.target.value }
+                    })}
+                  />
+                ) : (
+                  <p className="font-medium">{data.personalInfo.dateOfBirth || "N/A"}</p>
+                )}
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Nationality</p>
-                <p className="font-medium">{data.personalInfo.nationality || "N/A"}</p>
+                <Label className="text-sm text-muted-foreground">Nationality</Label>
+                {editMode ? (
+                  <Input
+                    value={editedData.personalInfo?.nationality || ""}
+                    onChange={(e) => setEditedData({
+                      ...editedData,
+                      personalInfo: { ...editedData.personalInfo, nationality: e.target.value }
+                    })}
+                  />
+                ) : (
+                  <p className="font-medium">{data.personalInfo.nationality || "N/A"}</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -272,20 +358,60 @@ const KYCReview = () => {
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <p className="text-sm text-muted-foreground">Street Address</p>
-                <p className="font-medium">{data.address.street || "N/A"}</p>
+                <Label className="text-sm text-muted-foreground">Street Address</Label>
+                {editMode ? (
+                  <Input
+                    value={editedData.address?.street || ""}
+                    onChange={(e) => setEditedData({
+                      ...editedData,
+                      address: { ...editedData.address, street: e.target.value }
+                    })}
+                  />
+                ) : (
+                  <p className="font-medium">{data.address.street || "N/A"}</p>
+                )}
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">City</p>
-                <p className="font-medium">{data.address.city || "N/A"}</p>
+                <Label className="text-sm text-muted-foreground">City</Label>
+                {editMode ? (
+                  <Input
+                    value={editedData.address?.city || ""}
+                    onChange={(e) => setEditedData({
+                      ...editedData,
+                      address: { ...editedData.address, city: e.target.value }
+                    })}
+                  />
+                ) : (
+                  <p className="font-medium">{data.address.city || "N/A"}</p>
+                )}
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Postal Code</p>
-                <p className="font-medium">{data.address.postalCode || "N/A"}</p>
+                <Label className="text-sm text-muted-foreground">Postal Code</Label>
+                {editMode ? (
+                  <Input
+                    value={editedData.address?.postalCode || ""}
+                    onChange={(e) => setEditedData({
+                      ...editedData,
+                      address: { ...editedData.address, postalCode: e.target.value }
+                    })}
+                  />
+                ) : (
+                  <p className="font-medium">{data.address.postalCode || "N/A"}</p>
+                )}
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Country</p>
-                <p className="font-medium">{data.address.country || "N/A"}</p>
+                <Label className="text-sm text-muted-foreground">Country</Label>
+                {editMode ? (
+                  <Input
+                    value={editedData.address?.country || ""}
+                    onChange={(e) => setEditedData({
+                      ...editedData,
+                      address: { ...editedData.address, country: e.target.value }
+                    })}
+                  />
+                ) : (
+                  <p className="font-medium">{data.address.country || "N/A"}</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -359,9 +485,42 @@ const KYCReview = () => {
         )}
 
         {/* Admin Actions */}
-        <Card>
+        <Card className="border-2 border-primary/20">
           <CardHeader>
-            <CardTitle className="text-lg">Admin Review</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Shield className="h-5 w-5 text-primary" />
+                Admin Intervention
+              </CardTitle>
+              {canEdit && !editMode && (
+                <Button
+                  onClick={enableEditMode}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit & Resubmit
+                </Button>
+              )}
+              {editMode && (
+                <Button
+                  onClick={() => {
+                    setEditMode(false);
+                    setEditedData(null);
+                  }}
+                  variant="ghost"
+                  size="sm"
+                >
+                  Cancel Edit
+                </Button>
+              )}
+            </div>
+            {editMode && (
+              <CardDescription className="text-amber-600 dark:text-amber-400">
+                ✏️ Edit mode active - Update user details and resubmit for verification
+              </CardDescription>
+            )}
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -374,42 +533,61 @@ const KYCReview = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Rejection Reason (Visible to User)</label>
-              <Textarea
-                placeholder="Explain why this verification is being rejected or needs revision..."
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                className="min-h-[80px]"
-              />
-            </div>
+            {!editMode && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Rejection Reason (Visible to User)</label>
+                <Textarea
+                  placeholder="Explain why this verification is being rejected or needs revision..."
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  className="min-h-[80px]"
+                />
+              </div>
+            )}
 
-            <div className="grid grid-cols-3 gap-3">
-              <Button
-                onClick={() => handleAction("approved")}
-                className="bg-gradient-to-r from-success to-success/80 text-success-foreground hover:shadow-lg hover:shadow-success/25 rounded-full"
-              >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Approve
-              </Button>
-              <Button
-                onClick={() => handleAction("needs_revision")}
-                variant="outline"
-                className="rounded-full"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Request Revision
-              </Button>
-              <Button
-                onClick={() => handleAction("rejected")}
-                variant="destructive"
-                className="rounded-full"
-                disabled={!rejectionReason.trim()}
-              >
-                <XCircle className="h-4 w-4 mr-2" />
-                Reject
-              </Button>
-            </div>
+            {editMode ? (
+              <div className="space-y-3">
+                <div className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                  <p className="text-sm text-amber-900 dark:text-amber-100">
+                    <strong>Admin Override:</strong> You're editing user data on their behalf. After making corrections, click "Resubmit for Verification" to send it back for review.
+                  </p>
+                </div>
+                <Button
+                  onClick={handleResubmit}
+                  className="w-full bg-gradient-to-r from-primary via-secondary to-accent text-white hover:shadow-lg rounded-full"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Resubmit for Verification
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-3">
+                <Button
+                  onClick={() => handleAction("approved")}
+                  className="bg-gradient-to-r from-success to-success/80 text-white hover:shadow-lg hover:shadow-success/25 rounded-full"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Approve
+                </Button>
+                <Button
+                  onClick={() => handleAction("needs_revision")}
+                  variant="outline"
+                  className="rounded-full"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Request Revision
+                </Button>
+                <Button
+                  onClick={() => handleAction("rejected")}
+                  variant="destructive"
+                  className="rounded-full"
+                  disabled={!rejectionReason.trim()}
+                >
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Reject
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
