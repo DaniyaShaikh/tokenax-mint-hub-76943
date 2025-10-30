@@ -53,8 +53,8 @@ const BuyerLayout = () => {
     { name: "Dashboard", href: "/dashboard", icon: Home },
     { name: "Transactions", href: "/dashboard/transactions", icon: ArrowLeftRight },
     { name: "Accounts", href: "/dashboard/accounts", icon: User },
-    { name: "Marketplace", href: "/dashboard/marketplace", icon: Store },
     { name: "Investments", href: "/dashboard/investments", icon: TrendingUp },
+    { name: "Marketplace", href: "/dashboard/marketplace", icon: Store },
   ];
 
   const isActive = (href: string) => {
