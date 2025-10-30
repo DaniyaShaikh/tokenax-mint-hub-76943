@@ -75,7 +75,7 @@ const KYCVerification = ({ currentStatus, onStatusChange }: KYCVerificationProps
           {getStatusBadge()}
         </CardHeader>
         <CardContent>
-          {!currentStatus || currentStatus === "rejected" || currentStatus === "needs_revision" ? (
+          {!currentStatus || currentStatus === "not_started" || currentStatus === "rejected" || currentStatus === "needs_revision" ? (
             <div className="space-y-6">
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground text-center">
