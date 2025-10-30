@@ -18,12 +18,12 @@ interface Property {
   property_type: string;
   description?: string;
   highlights?: string;
-  property_tokens?: Array<{
+  property_tokens?: {
     id: string;
     total_tokens: number;
     available_tokens: number;
     price_per_token: number;
-  }>;
+  };
 }
 
 interface TokenForm {
@@ -54,7 +54,7 @@ const TokenManagement = () => {
           .from("properties")
           .select(`
             *,
-            property_tokens (*)
+            property_tokens!inner (*)
           `)
           .eq("status", "tokenized")
           .order("created_at", { ascending: false }),
@@ -239,7 +239,7 @@ const TokenManagement = () => {
         <h2 className="text-3xl font-bold gradient-text">Active Tokenized Properties</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tokenizedProperties.map((property) => {
-            const tokens = property.property_tokens[0];
+            const tokens = property.property_tokens;
             if (!tokens) return null;
 
             const soldTokens = tokens.total_tokens - tokens.available_tokens;
