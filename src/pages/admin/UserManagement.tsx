@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Users, Mail, Calendar, Shield, CheckCircle, XCircle, Search } from "lucide-react";
+import { Users, Mail, Calendar, Shield, CheckCircle, XCircle, Search, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import {
   Table,
@@ -34,6 +34,7 @@ const UserManagement = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [creatingUsers, setCreatingUsers] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -85,6 +86,71 @@ const UserManagement = () => {
     return user.user_roles?.some((r) => r.role === "admin");
   };
 
+  const createTestUsers = async () => {
+    setCreatingUsers(true);
+    const dummyUsers = [
+      { email: "buyer1@example.com", password: "TestPass123!", full_name: "Emma Thompson", mode: "buyer" },
+      { email: "buyer2@example.com", password: "TestPass123!", full_name: "James Wilson", mode: "buyer" },
+      { email: "seller1@example.com", password: "TestPass123!", full_name: "Olivia Martinez", mode: "seller" },
+      { email: "seller2@example.com", password: "TestPass123!", full_name: "Michael Chen", mode: "seller" },
+      { email: "investor1@example.com", password: "TestPass123!", full_name: "Sophia Rodriguez", mode: "buyer" },
+    ];
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const user of dummyUsers) {
+      try {
+        const { error } = await supabase.auth.signUp({
+          email: user.email,
+          password: user.password,
+          options: {
+            data: {
+              full_name: user.full_name,
+            },
+          },
+        });
+
+        if (error) {
+          console.error(`Failed to create ${user.email}:`, error);
+          errorCount++;
+        } else {
+          successCount++;
+          
+          // Update user mode after profile is created
+          setTimeout(async () => {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("id")
+              .eq("email", user.email)
+              .single();
+            
+            if (profile) {
+              await supabase
+                .from("profiles")
+                .update({ user_mode: user.mode })
+                .eq("id", profile.id);
+            }
+          }, 1000);
+        }
+      } catch (err) {
+        console.error(`Error creating ${user.email}:`, err);
+        errorCount++;
+      }
+    }
+
+    setCreatingUsers(false);
+    
+    if (successCount > 0) {
+      toast.success(`Created ${successCount} test user${successCount > 1 ? 's' : ''}`);
+      setTimeout(() => loadUsers(), 2000);
+    }
+    
+    if (errorCount > 0) {
+      toast.error(`Failed to create ${errorCount} user${errorCount > 1 ? 's' : ''} (may already exist)`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -105,9 +171,20 @@ const UserManagement = () => {
       {/* Header */}
       <div className="relative overflow-hidden bg-gradient-to-r from-primary via-secondary to-accent p-8 rounded-3xl">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
-        <div className="relative">
-          <h1 className="text-4xl font-bold text-white mb-2">User Management</h1>
-          <p className="text-white/90 text-lg">Manage platform users and permissions</p>
+        <div className="relative flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">User Management</h1>
+            <p className="text-white/90 text-lg">Manage platform users and permissions</p>
+          </div>
+          <Button 
+            onClick={createTestUsers}
+            disabled={creatingUsers}
+            size="lg"
+            className="bg-white text-primary hover:bg-white/90"
+          >
+            <UserPlus className="h-5 w-5 mr-2" />
+            {creatingUsers ? "Creating..." : "Create Test Users"}
+          </Button>
         </div>
       </div>
 
