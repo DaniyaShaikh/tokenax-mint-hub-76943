@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Plus, DollarSign, AlertCircle } from "lucide-react";
+import { Building2, Plus, DollarSign, AlertCircle, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import KYCVerification from "./KYCVerification";
@@ -31,15 +31,15 @@ const SellerDashboard = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) return;
 
-      // Check KYC status
+      // Check KYC/KYB status - check for both types
       const { data: kycData } = await supabase
         .from("kyc_verifications")
         .select("status")
         .eq("user_id", user.data.user.id)
-        .eq("verification_type", "kyc")
+        .in("verification_type", ["kyc", "kyb"])
         .order("created_at", { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       setKycStatus(kycData?.status || null);
 
@@ -86,42 +86,55 @@ const SellerDashboard = () => {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-      <div className="bg-gradient-to-r from-primary to-accent p-8 rounded-2xl text-white">
-        <h2 className="text-3xl font-bold mb-2">Property Management</h2>
-        <p className="text-white/90">List and manage your real estate assets</p>
+      <div className="relative overflow-hidden bg-gradient-to-r from-primary via-secondary to-accent p-8 rounded-3xl">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
+        <div className="relative">
+          <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full">
+            <Shield className="h-4 w-4 text-white" />
+            <span className="text-sm font-semibold text-white">KYC Verified</span>
+          </div>
+          <h2 className="text-4xl font-bold mb-2 text-white">Property Management</h2>
+          <p className="text-white/90 text-lg">List and manage your real estate assets</p>
+        </div>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-2 hover:shadow-lg transition-shadow bg-gradient-to-br from-card to-accent-light/10">
+        <Card className="group border-2 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 transition-all hover:-translate-y-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Properties</CardTitle>
-            <Building2 className="h-5 w-5 text-accent" />
+            <div className="p-2 bg-gradient-to-br from-primary to-secondary rounded-xl group-hover:scale-110 transition-transform">
+              <Building2 className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-accent">{properties.length}</div>
+            <div className="text-4xl font-bold gradient-text">{properties.length}</div>
             <p className="text-xs text-muted-foreground mt-1">Listed properties</p>
           </CardContent>
         </Card>
-        <Card className="border-2 hover:shadow-lg transition-shadow bg-gradient-to-br from-card to-accent-light/10">
+        <Card className="group border-2 hover:border-secondary/50 hover:shadow-xl hover:shadow-secondary/10 transition-all hover:-translate-y-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Tokenized</CardTitle>
-            <DollarSign className="h-5 w-5 text-accent" />
+            <div className="p-2 bg-gradient-to-br from-secondary to-accent rounded-xl group-hover:scale-110 transition-transform">
+              <DollarSign className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-accent">
+            <div className="text-4xl font-bold gradient-text">
               {properties.filter((p) => p.status === "tokenized").length}
             </div>
             <p className="text-xs text-muted-foreground mt-1">Live on marketplace</p>
           </CardContent>
         </Card>
-        <Card className="border-2 hover:shadow-lg transition-shadow bg-gradient-to-br from-card to-accent-light/10">
+        <Card className="group border-2 hover:border-warning/50 hover:shadow-xl hover:shadow-warning/10 transition-all hover:-translate-y-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Pending Review</CardTitle>
-            <AlertCircle className="h-5 w-5 text-warning" />
+            <div className="p-2 bg-gradient-to-br from-warning to-warning/80 rounded-xl group-hover:scale-110 transition-transform">
+              <AlertCircle className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-warning">
+            <div className="text-4xl font-bold text-warning">
               {properties.filter((p) => p.status === "pending").length}
             </div>
             <p className="text-xs text-muted-foreground mt-1">Awaiting approval</p>
@@ -136,7 +149,11 @@ const SellerDashboard = () => {
             <h2 className="text-2xl font-bold">My Properties</h2>
             <p className="text-muted-foreground text-sm">Manage your listed properties</p>
           </div>
-          <Button onClick={() => navigate("/list-property")} size="lg" className="gap-2">
+          <Button 
+            onClick={() => navigate("/list-property")} 
+            size="lg" 
+            className="gap-2 bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/25 rounded-full"
+          >
             <Plus className="h-5 w-5" />
             List New Property
           </Button>

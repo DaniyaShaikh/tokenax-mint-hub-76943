@@ -126,19 +126,22 @@ const TokenManagement = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-primary">Token Management</h1>
-        <p className="text-muted-foreground mt-1">
-          Create and manage property tokens
-        </p>
+      <div className="relative overflow-hidden bg-gradient-to-r from-primary via-secondary to-accent p-8 rounded-3xl">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
+        <div className="relative">
+          <h1 className="text-4xl font-bold text-white mb-2">Token Management</h1>
+          <p className="text-white/90 text-lg">
+            Create and manage property tokens
+          </p>
+        </div>
       </div>
 
       {/* Ready for Tokenization */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-semibold text-primary">Ready for Tokenization</h2>
+        <h2 className="text-3xl font-bold gradient-text">Ready for Tokenization</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {approvedProperties.map((property) => (
-            <Card key={property.id} className="hover:shadow-card transition-all">
+            <Card key={property.id} className="border-2 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10 transition-all hover:-translate-y-1">
               <CardHeader>
                 <CardTitle>{property.title}</CardTitle>
                 <CardDescription>{property.address}</CardDescription>
@@ -156,7 +159,7 @@ const TokenManagement = () => {
                   onOpenChange={(open) => setDialogOpen({ ...dialogOpen, [property.id]: open })}
                 >
                   <DialogTrigger asChild>
-                    <Button className="w-full bg-accent hover:bg-accent/90">
+                    <Button className="w-full bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/25 rounded-full">
                       <Coins className="h-4 w-4 mr-2" />
                       Create Tokens
                     </Button>
@@ -206,7 +209,7 @@ const TokenManagement = () => {
                     <DialogFooter>
                       <Button
                         onClick={() => handleCreateTokens(property.id)}
-                        className="w-full bg-success hover:bg-success/90"
+                        className="w-full bg-gradient-to-r from-success to-success/80 hover:shadow-lg hover:shadow-success/25 rounded-full"
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
                         Publish & Tokenize
@@ -230,7 +233,7 @@ const TokenManagement = () => {
 
       {/* Active Tokenized Properties */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-semibold text-primary">Active Tokenized Properties</h2>
+        <h2 className="text-3xl font-bold gradient-text">Active Tokenized Properties</h2>
         <div className="grid grid-cols-1 gap-6">
           {tokenizedProperties.map((property) => {
             const tokens = property.property_tokens[0];
@@ -240,14 +243,16 @@ const TokenManagement = () => {
             const soldPercentage = (soldTokens / tokens.total_tokens) * 100;
 
             return (
-              <Card key={property.id} className="bg-gradient-to-br from-card to-accent/5">
+              <Card key={property.id} className="border-2 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10 transition-all">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
                       <CardTitle>{property.title}</CardTitle>
                       <CardDescription>{property.address}</CardDescription>
                     </div>
-                    <Badge className="bg-success text-success-foreground">Live</Badge>
+                    <div className="px-4 py-2 rounded-full bg-gradient-to-r from-success to-success/80 text-white font-semibold text-sm shadow-lg">
+                      Live
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>

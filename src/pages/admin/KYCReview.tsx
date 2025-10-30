@@ -112,21 +112,28 @@ const KYCReview = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-primary">KYC / KYB Review</h1>
-          <p className="text-muted-foreground mt-1">
-            Review and verify user identity documents
-          </p>
+      <div className="relative overflow-hidden bg-gradient-to-r from-primary via-secondary to-accent p-8 rounded-3xl">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
+        <div className="relative flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">KYC / KYB Review</h1>
+            <p className="text-white/90 text-lg">
+              Review and verify user identity documents
+            </p>
+          </div>
+          {selectedIds.length > 0 && (
+            <Button 
+              onClick={handleBulkApprove} 
+              size="lg"
+              className="bg-white text-primary hover:bg-white/90 shadow-lg rounded-full"
+            >
+              <CheckCircle className="h-5 w-5 mr-2" />
+              Bulk Approve ({selectedIds.length})
+            </Button>
+          )}
         </div>
-        {selectedIds.length > 0 && (
-          <Button onClick={handleBulkApprove} className="bg-accent hover:bg-accent/90">
-            <CheckCircle className="h-4 w-4 mr-2" />
-            Bulk Approve ({selectedIds.length})
-          </Button>
-        )}
       </div>
 
       {/* Verifications List */}
@@ -139,8 +146,8 @@ const KYCReview = () => {
             <Card
               key={kyc.id}
               className={cn(
-                "transition-all duration-300 hover:shadow-card",
-                isSelected && "ring-2 ring-accent"
+                "transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 border-2 hover:border-primary/30",
+                isSelected && "ring-2 ring-primary border-primary/50"
               )}
             >
               <CardHeader>
@@ -174,12 +181,9 @@ const KYCReview = () => {
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge
-                    variant={isKYB ? "default" : "secondary"}
-                    className={isKYB ? "bg-accent text-accent-foreground" : ""}
-                  >
+                  <div className="px-4 py-2 rounded-full bg-gradient-to-r from-primary to-secondary text-white font-semibold text-sm shadow-lg">
                     {kyc.verification_type.toUpperCase()}
-                  </Badge>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -203,9 +207,8 @@ const KYCReview = () => {
 
                 <div className="flex gap-2">
                   <Button
-                    variant="default"
                     onClick={() => handleAction(kyc.id, "approved")}
-                    className="flex-1 bg-success hover:bg-success/90"
+                    className="flex-1 bg-gradient-to-r from-success to-success/80 hover:shadow-lg hover:shadow-success/25 rounded-full"
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Approve
@@ -213,7 +216,7 @@ const KYCReview = () => {
                   <Button
                     variant="destructive"
                     onClick={() => handleAction(kyc.id, "rejected")}
-                    className="flex-1"
+                    className="flex-1 rounded-full"
                     disabled={!rejectionReasons[kyc.id]}
                   >
                     <XCircle className="h-4 w-4 mr-2" />

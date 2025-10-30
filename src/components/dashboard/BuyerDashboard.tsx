@@ -97,43 +97,44 @@ const BuyerDashboard = () => {
         </div>
       ) : (
         <div className="space-y-8">
-          <div className="rounded-3xl bg-gradient-to-br from-primary/10 via-accent/10 to-accent-dark/10 p-8 border border-border">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 bg-accent/10 rounded-full">
-                <TrendingUp className="h-6 w-6 text-accent" />
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary via-secondary to-accent p-8">
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
+            <div className="relative flex items-center gap-3 mb-6">
+              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                <TrendingUp className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold">My Investment Portfolio</h2>
-                <p className="text-muted-foreground">Track your tokenized real estate investments</p>
+                <h2 className="text-3xl font-bold text-white">My Investment Portfolio</h2>
+                <p className="text-white/90">Track your tokenized real estate investments</p>
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="border-accent/20">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+              <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all hover:-translate-y-1">
                 <CardHeader>
-                  <CardDescription>Total Investment Value</CardDescription>
-                  <CardTitle className="text-4xl text-accent">${portfolio.total_value.toLocaleString()}</CardTitle>
+                  <CardDescription className="text-white/80">Total Investment Value</CardDescription>
+                  <CardTitle className="text-4xl text-white">${portfolio.total_value.toLocaleString()}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-xs text-muted-foreground">Across all properties</p>
+                  <p className="text-xs text-white/70">Across all properties</p>
                 </CardContent>
               </Card>
-              <Card className="border-primary/20">
+              <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all hover:-translate-y-1">
                 <CardHeader>
-                  <CardDescription>Total Tokens Owned</CardDescription>
-                  <CardTitle className="text-4xl text-primary">{portfolio.total_tokens.toLocaleString()}</CardTitle>
+                  <CardDescription className="text-white/80">Total Tokens Owned</CardDescription>
+                  <CardTitle className="text-4xl text-white">{portfolio.total_tokens.toLocaleString()}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-xs text-muted-foreground">Real estate tokens</p>
+                  <p className="text-xs text-white/70">Real estate tokens</p>
                 </CardContent>
               </Card>
-              <Card className="border-accent-dark/20">
+              <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all hover:-translate-y-1">
                 <CardHeader>
-                  <CardDescription>Properties Invested</CardDescription>
-                  <CardTitle className="text-4xl text-accent-dark">{portfolio.properties_count}</CardTitle>
+                  <CardDescription className="text-white/80">Properties Invested</CardDescription>
+                  <CardTitle className="text-4xl text-white">{portfolio.properties_count}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-xs text-muted-foreground">Diversified portfolio</p>
+                  <p className="text-xs text-white/70">Diversified portfolio</p>
                 </CardContent>
               </Card>
             </div>
@@ -142,8 +143,8 @@ const BuyerDashboard = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-2xl font-bold">Marketplace</h3>
-                <p className="text-muted-foreground">Explore tokenized properties</p>
+                <h3 className="text-3xl font-bold gradient-text">Marketplace</h3>
+                <p className="text-muted-foreground text-lg">Explore tokenized properties</p>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -152,7 +153,7 @@ const BuyerDashboard = () => {
                   const tokens = property.property_tokens[0];
                   const images = property.property_images || [];
                   return (
-                    <Card key={property.id} className="border-2 hover:shadow-xl transition-all hover:-translate-y-1 overflow-hidden group">
+                    <Card key={property.id} className="border-2 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 transition-all hover:-translate-y-1 overflow-hidden group">
                       <div className="relative">
                         {images.length > 0 ? (
                           <Carousel className="w-full">
@@ -183,7 +184,9 @@ const BuyerDashboard = () => {
                           </div>
                         )}
                         <div className="absolute top-3 right-3">
-                          <Badge className="bg-accent/90 backdrop-blur-sm text-white capitalize shadow-lg">{property.property_type}</Badge>
+                          <div className="px-4 py-2 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold capitalize shadow-lg backdrop-blur-sm">
+                            {property.property_type}
+                          </div>
                         </div>
                       </div>
                       <CardHeader>

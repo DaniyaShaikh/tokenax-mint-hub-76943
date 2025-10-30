@@ -102,19 +102,22 @@ const PropertyEvaluation = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-primary">Property Evaluation</h1>
-        <p className="text-muted-foreground mt-1">
-          Review and approve property listings for tokenization
-        </p>
+      <div className="relative overflow-hidden bg-gradient-to-r from-primary via-secondary to-accent p-8 rounded-3xl">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
+        <div className="relative">
+          <h1 className="text-4xl font-bold text-white mb-2">Property Evaluation</h1>
+          <p className="text-white/90 text-lg">
+            Review and approve property listings for tokenization
+          </p>
+        </div>
       </div>
 
       {/* Properties List */}
       <div className="grid grid-cols-1 gap-6">
         {properties.map((property) => (
-          <Card key={property.id} className="hover:shadow-card transition-all duration-300">
+          <Card key={property.id} className="border-2 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -133,9 +136,9 @@ const PropertyEvaluation = () => {
                     </div>
                   </CardDescription>
                 </div>
-                <Badge className="capitalize bg-primary text-primary-foreground">
+                <div className="px-4 py-2 rounded-full bg-gradient-to-r from-primary to-secondary text-white font-semibold text-sm capitalize shadow-lg">
                   {property.property_type}
-                </Badge>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -243,9 +246,8 @@ const PropertyEvaluation = () => {
               {/* Actions */}
               <div className="flex gap-2 pt-2">
                 <Button
-                  variant="default"
                   onClick={() => handleAction(property.id, "approved")}
-                  className="flex-1 bg-success hover:bg-success/90"
+                  className="flex-1 bg-gradient-to-r from-success to-success/80 hover:shadow-lg hover:shadow-success/25 rounded-full"
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Approve for Tokenization
@@ -253,7 +255,7 @@ const PropertyEvaluation = () => {
                 <Button
                   variant="destructive"
                   onClick={() => handleAction(property.id, "rejected")}
-                  className="flex-1"
+                  className="flex-1 rounded-full"
                   disabled={!rejectionReasons[property.id]}
                 >
                   <XCircle className="h-4 w-4 mr-2" />

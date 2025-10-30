@@ -87,57 +87,94 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent-light/10">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-primary/5">
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-16 left-0 z-40 h-[calc(100vh-4rem)] bg-card border-r border-border transition-all duration-300",
-          sidebarOpen ? "w-64" : "w-16"
+          "fixed top-0 left-0 z-50 h-screen bg-card/95 backdrop-blur-xl border-r border-border/50 shadow-xl transition-all duration-300",
+          sidebarOpen ? "w-72" : "w-20"
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Toggle Button */}
-          <div className="p-4 border-b border-border">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="w-full"
-            >
-              {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
+          {/* Logo & Toggle */}
+          <div className="p-6 border-b border-border/50">
+            <div className="flex items-center justify-between">
+              {sidebarOpen && (
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-br from-primary to-secondary rounded-xl">
+                    <LayoutDashboard className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="font-bold gradient-text">Admin Portal</h2>
+                    <p className="text-xs text-muted-foreground">Management Hub</p>
+                  </div>
+                </div>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="hover:bg-muted rounded-xl"
+              >
+                {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
+            </div>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2">
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             {navigation.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
 
               return (
                 <Link key={item.name} to={item.href}>
-                  <Button
-                    variant={active ? "default" : "ghost"}
+                  <div
                     className={cn(
-                      "w-full justify-start gap-3 transition-all",
-                      active && "bg-accent text-accent-foreground shadow-accent"
+                      "group relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
+                      active
+                        ? "bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/25"
+                        : "hover:bg-muted/80 text-foreground/70 hover:text-foreground"
                     )}
                   >
-                    <Icon className="h-5 w-5 flex-shrink-0" />
-                    {sidebarOpen && <span>{item.name}</span>}
-                  </Button>
+                    <Icon className={cn(
+                      "h-5 w-5 flex-shrink-0",
+                      active && "text-white"
+                    )} />
+                    {sidebarOpen && (
+                      <span className={cn(
+                        "font-medium text-sm",
+                        active && "text-white"
+                      )}>
+                        {item.name}
+                      </span>
+                    )}
+                    {active && (
+                      <div className="absolute right-0 w-1 h-8 bg-white rounded-l-full" />
+                    )}
+                  </div>
                 </Link>
               );
             })}
           </nav>
+
+          {/* Footer */}
+          {sidebarOpen && (
+            <div className="p-4 border-t border-border/50">
+              <div className="p-4 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-xl">
+                <p className="text-xs font-semibold text-primary mb-1">Admin Access</p>
+                <p className="text-xs text-muted-foreground">Full system control</p>
+              </div>
+            </div>
+          )}
         </div>
       </aside>
 
       {/* Main Content */}
       <main
         className={cn(
-          "pt-16 transition-all duration-300",
-          sidebarOpen ? "ml-64" : "ml-16"
+          "transition-all duration-300 min-h-screen",
+          sidebarOpen ? "ml-72" : "ml-20"
         )}
       >
         <div className="p-8">
