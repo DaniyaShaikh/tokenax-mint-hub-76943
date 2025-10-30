@@ -12,10 +12,16 @@ const HeroSection = () => {
   
   const [currentAssetIndex, setCurrentAssetIndex] = useState(0);
 
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentAssetIndex((prev) => (prev + 1) % assetTypes.length);
-    }, 2500);
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentAssetIndex((prev) => (prev + 1) % assetTypes.length);
+        setIsTransitioning(false);
+      }, 300);
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
   return (
@@ -41,8 +47,11 @@ const HeroSection = () => {
           
           <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
             <span className="gradient-text">Tokenize </span>
-            <br />
-            <span className="gradient-text transition-all duration-500 inline-block min-w-[400px] text-left">
+            <span 
+              className={`gradient-text italic inline-block min-w-[280px] sm:min-w-[400px] transition-all duration-300 ${
+                isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
+              }`}
+            >
               {assetTypes[currentAssetIndex]}
             </span>
           </h1>
