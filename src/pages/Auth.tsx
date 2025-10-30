@@ -20,15 +20,39 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
-        navigate("/dashboard");
+        // Check if user is admin
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id);
+        
+        const isAdmin = roles?.some((r) => r.role === "admin");
+        
+        if (isAdmin) {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
-        navigate("/dashboard");
+        // Check if user is admin
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id);
+        
+        const isAdmin = roles?.some((r) => r.role === "admin");
+        
+        if (isAdmin) {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
       }
     });
 
@@ -82,7 +106,23 @@ const Auth = () => {
       // Dummy OTP - accepts any input
       if (otp.length >= 4) {
         toast.success("Verification successful!");
-        navigate("/dashboard");
+        
+        // Check if user is admin before redirecting
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data: roles } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", session.user.id);
+          
+          const isAdmin = roles?.some((r) => r.role === "admin");
+          
+          if (isAdmin) {
+            navigate("/admin");
+          } else {
+            navigate("/dashboard");
+          }
+        }
       } else {
         toast.error("Please enter at least 4 digits");
       }
