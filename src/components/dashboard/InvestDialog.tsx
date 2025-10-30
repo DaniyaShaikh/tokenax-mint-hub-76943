@@ -72,10 +72,12 @@ export const InvestDialog = ({ property, open, onOpenChange, onSuccess }: Invest
 
       if (updateError) throw updateError;
 
+      // Show success message with payment instructions
       toast.success(
-        `Successfully purchased ${tokens} tokens! In production, payment of $${totalAmount.toLocaleString()} would be processed via Stripe.`,
-        { duration: 5000 }
+        `Purchase record created! Payment instructions sent to your email. Total: $${totalAmount.toLocaleString()}. Please complete payment to legally claim your ${tokens} tokens.`,
+        { duration: 8000 }
       );
+      
       onOpenChange(false);
       onSuccess();
     } catch (error: any) {
@@ -142,8 +144,15 @@ export const InvestDialog = ({ property, open, onOpenChange, onSuccess }: Invest
               onClick={handleInvest}
               disabled={loading}
             >
-              {loading ? "Processing..." : "Confirm Investment"}
+              {loading ? "Creating Purchase Record..." : "Create Purchase Record"}
             </Button>
+          </div>
+
+          <div className="bg-muted/50 p-4 rounded-lg border border-border">
+            <p className="text-sm text-muted-foreground">
+              📧 After creating your purchase record, payment instructions will be sent to your email. 
+              Complete the payment to legally claim your tokens and become a property stakeholder.
+            </p>
           </div>
         </div>
       </DialogContent>
