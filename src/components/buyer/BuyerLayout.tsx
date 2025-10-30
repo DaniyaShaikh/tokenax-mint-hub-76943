@@ -16,12 +16,16 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import KYCVerification from "@/components/dashboard/KYCVerification";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const BuyerLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
   const [userMode, setUserMode] = useState<"buyer" | "seller">("buyer");
   const [userId, setUserId] = useState<string | null>(null);
+  const [kycStatus, setKycStatus] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -41,21 +45,40 @@ const BuyerLayout = () => {
 
       setUserId(session.user.id);
       
-      // Load user mode from profile
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("user_mode")
-        .eq("id", session.user.id)
-        .single();
+      // Load user mode and KYC status from profile
+      const [profileResult, kycResult] = await Promise.all([
+        supabase.from("profiles").select("user_mode").eq("id", session.user.id).single(),
+        supabase.from("kyc_verifications").select("status").eq("user_id", session.user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+      ]);
       
-      if (profile) {
-        setUserMode(profile.user_mode as "buyer" | "seller");
+      if (profileResult.data) {
+        setUserMode(profileResult.data.user_mode as "buyer" | "seller");
+      }
+
+      if (kycResult.data) {
+        setKycStatus(kycResult.data.status);
       }
     } catch (error) {
       toast.error("Failed to verify access");
       navigate("/auth");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadKYCStatus = async () => {
+    if (!userId) return;
+    
+    const { data } = await supabase
+      .from("kyc_verifications")
+      .select("status")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
+    if (data) {
+      setKycStatus(data.status);
     }
   };
 
@@ -103,6 +126,31 @@ const BuyerLayout = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  const isKYCApproved = kycStatus === "approved";
+
+  // Show KYC verification if not approved
+  if (!isKYCApproved) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="mb-6">
+            <Alert variant="destructive" className="border-warning bg-warning/10">
+              <AlertCircle className="h-4 w-4 text-warning" />
+              <AlertTitle className="text-warning">KYC Verification Required</AlertTitle>
+              <AlertDescription className="text-warning/90">
+                Complete your KYC verification to unlock full access to the platform
+              </AlertDescription>
+            </Alert>
+          </div>
+          <KYCVerification 
+            currentStatus={kycStatus || "not_started"} 
+            onStatusChange={loadKYCStatus}
+          />
+        </div>
       </div>
     );
   }
