@@ -95,8 +95,24 @@ const KYCSteps = ({ verificationType, onComplete }: KYCStepsProps) => {
 
       if (error) throw error;
 
-      toast.success("Verification submitted successfully!");
-      onComplete();
+      toast.success("Verification submitted! Processing...");
+      
+      // Simulate approval process (2 seconds)
+      setTimeout(async () => {
+        const { error: updateError } = await supabase
+          .from("kyc_verifications")
+          .update({ 
+            status: "approved",
+            verified_at: new Date().toISOString()
+          })
+          .eq("user_id", user.data.user.id);
+
+        if (!updateError) {
+          toast.success("KYC Approved! Welcome aboard!");
+          onComplete();
+        }
+      }, 2000);
+      
     } catch (error: any) {
       toast.error(error.message);
     }

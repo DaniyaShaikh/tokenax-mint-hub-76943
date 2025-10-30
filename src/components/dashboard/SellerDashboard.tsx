@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Plus, DollarSign, AlertCircle, Shield } from "lucide-react";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { Building2, TrendingUp, Plus, Coins, DollarSign, Clock, CheckCircle, XCircle } from "lucide-react";
+import { PropertyListingDialog } from "./PropertyListingDialog";
 import KYCVerification from "./KYCVerification";
 
 interface Property {
@@ -14,13 +13,18 @@ interface Property {
   status: string;
   valuation: number;
   rejection_reason?: string;
+  property_tokens?: Array<{
+    total_tokens: number;
+    available_tokens: number;
+    price_per_token: number;
+  }>;
 }
 
 const SellerDashboard = () => {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [listingDialogOpen, setListingDialogOpen] = useState(false);
   const [kycStatus, setKycStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     loadData();
@@ -31,22 +35,30 @@ const SellerDashboard = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) return;
 
-      // Check KYC/KYB status - check for both types
       const { data: kycData } = await supabase
         .from("kyc_verifications")
         .select("status")
         .eq("user_id", user.data.user.id)
-        .in("verification_type", ["kyc", "kyb"])
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
       setKycStatus(kycData?.status || null);
 
-      // Load user properties
       const { data: propertiesData } = await supabase
         .from("properties")
-        .select("id, title, status, valuation, rejection_reason")
+        .select(`
+          id, 
+          title, 
+          status, 
+          valuation, 
+          rejection_reason,
+          property_tokens (
+            total_tokens,
+            available_tokens,
+            price_per_token
+          )
+        `)
         .eq("owner_id", user.data.user.id)
         .order("created_at", { ascending: false });
 
@@ -54,28 +66,34 @@ const SellerDashboard = () => {
         setProperties(propertiesData);
       }
     } catch (error: any) {
-      toast.error("Failed to load data");
+      console.error("Error loading data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive"> = {
-      draft: "secondary",
-      pending: "default",
-      approved: "default",
-      rejected: "destructive",
-      tokenized: "default",
+    const statusConfig: Record<string, { variant: "default" | "secondary" | "destructive"; icon: any }> = {
+      draft: { variant: "secondary", icon: Clock },
+      pending_review: { variant: "default", icon: Clock },
+      approved: { variant: "default", icon: CheckCircle },
+      rejected: { variant: "destructive", icon: XCircle },
+      tokenized: { variant: "default", icon: CheckCircle },
     };
-    return <Badge variant={variants[status] || "secondary"}>{status}</Badge>;
+    const config = statusConfig[status] || { variant: "secondary", icon: Clock };
+    const Icon = config.icon;
+    return (
+      <Badge variant={config.variant} className="gap-1">
+        <Icon className="h-3 w-3" />
+        {status.replace("_", " ")}
+      </Badge>
+    );
   };
 
   if (loading) {
-    return <div className="container mx-auto px-4 py-8">Loading...</div>;
+    return <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">Loading...</div>;
   }
 
-  // Show KYC verification if not approved
   if (kycStatus !== "approved") {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -84,131 +102,170 @@ const SellerDashboard = () => {
     );
   }
 
+  const totalProperties = properties.length;
+  const tokenizedProperties = properties.filter(p => p.status === "tokenized").length;
+  const pendingReview = properties.filter(p => p.status === "pending_review" || p.status === "draft").length;
+
+  const totalTokensSold = properties.reduce((sum, p) => {
+    if (p.property_tokens && p.property_tokens[0]) {
+      const tokenData = p.property_tokens[0];
+      return sum + (tokenData.total_tokens - tokenData.available_tokens);
+    }
+    return sum;
+  }, 0);
+
+  const totalRevenue = properties.reduce((sum, p) => {
+    if (p.property_tokens && p.property_tokens[0]) {
+      const tokenData = p.property_tokens[0];
+      const soldTokens = tokenData.total_tokens - tokenData.available_tokens;
+      return sum + (soldTokens * Number(tokenData.price_per_token));
+    }
+    return sum;
+  }, 0);
+
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-      <div className="relative overflow-hidden bg-gradient-to-r from-primary via-secondary to-accent p-8 rounded-3xl">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
-        <div className="relative">
-          <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full">
-            <Shield className="h-4 w-4 text-white" />
-            <span className="text-sm font-semibold text-white">KYC Verified</span>
-          </div>
-          <h2 className="text-4xl font-bold mb-2 text-white">Property Management</h2>
-          <p className="text-white/90 text-lg">List and manage your real estate assets</p>
-        </div>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="group border-2 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 transition-all hover:-translate-y-1">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Properties</CardTitle>
-            <div className="p-2 bg-gradient-to-br from-primary to-secondary rounded-xl group-hover:scale-110 transition-transform">
-              <Building2 className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold gradient-text">{properties.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">Listed properties</p>
-          </CardContent>
-        </Card>
-        <Card className="group border-2 hover:border-secondary/50 hover:shadow-xl hover:shadow-secondary/10 transition-all hover:-translate-y-1">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Tokenized</CardTitle>
-            <div className="p-2 bg-gradient-to-br from-secondary to-accent rounded-xl group-hover:scale-110 transition-transform">
-              <DollarSign className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold gradient-text">
-              {properties.filter((p) => p.status === "tokenized").length}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Live on marketplace</p>
-          </CardContent>
-        </Card>
-        <Card className="group border-2 hover:border-warning/50 hover:shadow-xl hover:shadow-warning/10 transition-all hover:-translate-y-1">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pending Review</CardTitle>
-            <div className="p-2 bg-gradient-to-br from-warning to-warning/80 rounded-xl group-hover:scale-110 transition-transform">
-              <AlertCircle className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold text-warning">
-              {properties.filter((p) => p.status === "pending").length}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Awaiting approval</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Properties List */}
-      <div>
-        <div className="flex items-center justify-between mb-6">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg p-8 mb-8">
+        <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold">My Properties</h2>
-            <p className="text-muted-foreground text-sm">Manage your listed properties</p>
+            <h2 className="text-3xl font-bold mb-2">Property Management</h2>
+            <p className="text-muted-foreground">Manage and tokenize your real estate portfolio</p>
           </div>
-          <Button 
-            onClick={() => navigate("/list-property")} 
-            size="lg" 
-            className="gap-2 bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/25 rounded-full"
-          >
-            <Plus className="h-5 w-5" />
+          <Button onClick={() => setListingDialogOpen(true)} size="lg">
+            <Plus className="h-5 w-5 mr-2" />
             List New Property
           </Button>
         </div>
+      </div>
 
-        <div className="grid gap-6">
-          {properties.map((property) => (
-            <Card key={property.id} className="border-2 hover:shadow-lg transition-all">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <CardTitle className="text-xl">{property.title}</CardTitle>
-                      {getStatusBadge(property.status)}
-                    </div>
-                    <CardDescription className="text-base">
-                      <span className="font-semibold text-accent">${Number(property.valuation).toLocaleString()}</span> valuation
-                    </CardDescription>
-                  </div>
-                  <Building2 className="h-8 w-8 text-muted-foreground/30" />
-                </div>
-              </CardHeader>
-              {property.rejection_reason && (
-                <CardContent>
-                  <div className="bg-destructive/10 border-2 border-destructive/30 rounded-lg p-4">
-                    <div className="flex items-start gap-2">
-                      <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-semibold text-destructive">Rejection Reason:</p>
-                        <p className="text-sm text-muted-foreground mt-1">{property.rejection_reason}</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-          ))}
-        </div>
+      <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Properties</CardTitle>
+            <Building2 className="h-5 w-5 text-accent" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{totalProperties}</div>
+            <p className="text-xs text-muted-foreground mt-1">Properties listed</p>
+          </CardContent>
+        </Card>
 
-        {properties.length === 0 && (
-          <Card className="border-2 border-dashed border-border/50">
-            <CardContent className="py-16 text-center">
-              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-accent/10 mb-4">
-                <Building2 className="h-8 w-8 text-accent" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">No properties listed yet</h3>
-              <p className="text-muted-foreground mb-6">Get started by listing your first property for tokenization</p>
-              <Button onClick={() => navigate("/list-property")} size="lg" className="gap-2">
-                <Plus className="h-5 w-5" />
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Tokenized</CardTitle>
+            <TrendingUp className="h-5 w-5 text-accent" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{tokenizedProperties}</div>
+            <p className="text-xs text-muted-foreground mt-1">Active on marketplace</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Tokens Sold</CardTitle>
+            <Coins className="h-5 w-5 text-accent" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{totalTokensSold.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground mt-1">Total tokens sold</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Revenue</CardTitle>
+            <DollarSign className="h-5 w-5 text-accent" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+            <p className="text-xs text-muted-foreground mt-1">From token sales</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Your Properties</CardTitle>
+              <CardDescription>Manage and track your property listings</CardDescription>
+            </div>
+            {properties.length > 0 && <Badge variant="outline">{pendingReview} Pending Review</Badge>}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {properties.length === 0 ? (
+            <div className="text-center py-12">
+              <Building2 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No properties yet</h3>
+              <p className="text-muted-foreground mb-6">Start by listing your first property for tokenization</p>
+              <Button onClick={() => setListingDialogOpen(true)}>
+                <Plus className="h-5 w-5 mr-2" />
                 List Your First Property
               </Button>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {properties.map((property) => {
+                const tokenData = property.property_tokens?.[0];
+                const tokensLeft = tokenData?.available_tokens || 0;
+                const totalTokens = tokenData?.total_tokens || 0;
+                const tokensSold = totalTokens - tokensLeft;
+                const percentageSold = totalTokens > 0 ? (tokensSold / totalTokens) * 100 : 0;
+
+                return (
+                  <div key={property.id} className="p-6 border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-start gap-4">
+                        <Building2 className="h-12 w-12 text-accent flex-shrink-0" />
+                        <div>
+                          <h4 className="font-semibold text-lg">{property.title}</h4>
+                          <p className="text-sm text-muted-foreground">${Number(property.valuation).toLocaleString()} valuation</p>
+                          {property.rejection_reason && (
+                            <p className="text-xs text-destructive mt-1">Rejection: {property.rejection_reason}</p>
+                          )}
+                        </div>
+                      </div>
+                      {getStatusBadge(property.status)}
+                    </div>
+
+                    {property.status === "tokenized" && tokenData && (
+                      <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Tokens Sold</p>
+                            <p className="text-lg font-bold text-accent">{tokensSold.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Tokens Left</p>
+                            <p className="text-lg font-bold">{tokensLeft.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Revenue</p>
+                            <p className="text-lg font-bold">${(tokensSold * Number(tokenData.price_per_token)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                            <span>Sales Progress</span>
+                            <span>{percentageSold.toFixed(1)}%</span>
+                          </div>
+                          <div className="h-2 bg-background rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-primary to-accent transition-all" style={{ width: `${percentageSold}%` }} />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <PropertyListingDialog open={listingDialogOpen} onOpenChange={setListingDialogOpen} onSuccess={loadData} />
     </div>
   );
 };

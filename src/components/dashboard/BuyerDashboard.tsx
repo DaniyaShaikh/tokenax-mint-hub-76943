@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { Building2, TrendingUp, Wallet, MapPin, Coins } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Building2, MapPin, TrendingUp } from "lucide-react";
-import { toast } from "sonner";
 import { InvestDialog } from "./InvestDialog";
 
 interface Property {
@@ -15,6 +14,8 @@ interface Property {
   valuation: number;
   property_type: string;
   property_images: string[];
+  description?: string;
+  highlights?: string;
   property_tokens: {
     total_tokens: number;
     available_tokens: number;
@@ -23,17 +24,23 @@ interface Property {
 }
 
 interface Portfolio {
-  total_value: number;
-  total_tokens: number;
-  properties_count: number;
+  totalValue: number;
+  totalTokens: number;
+  propertiesCount: number;
+  investments: Array<{
+    property_title: string;
+    tokens: number;
+    value: number;
+  }>;
 }
 
 const BuyerDashboard = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [portfolio, setPortfolio] = useState<Portfolio>({
-    total_value: 0,
-    total_tokens: 0,
-    properties_count: 0,
+    totalValue: 0,
+    totalTokens: 0,
+    propertiesCount: 0,
+    investments: [],
   });
   const [loading, setLoading] = useState(true);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
@@ -48,233 +55,163 @@ const BuyerDashboard = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) return;
 
-      // Load marketplace properties
       const { data: propertiesData } = await supabase
         .from("properties")
-        .select(`
-          *,
-          property_tokens (
-            total_tokens,
-            available_tokens,
-            price_per_token
-          )
-        `)
+        .select(`*, property_tokens (total_tokens, available_tokens, price_per_token)`)
         .eq("status", "tokenized");
 
-      if (propertiesData) {
-        setProperties(propertiesData as any);
-      }
+      setProperties(propertiesData || []);
 
-      // Load user portfolio
       const { data: purchases } = await supabase
         .from("token_purchases")
-        .select("tokens_purchased, total_amount, property_id")
+        .select(`tokens_purchased, total_amount, property_id, properties (title)`)
         .eq("buyer_id", user.data.user.id);
 
-      if (purchases) {
+      if (purchases && purchases.length > 0) {
         const totalValue = purchases.reduce((sum, p) => sum + Number(p.total_amount), 0);
-        const totalTokens = purchases.reduce((sum, p) => sum + Number(p.tokens_purchased), 0);
-        const uniqueProperties = new Set(purchases.map((p) => p.property_id)).size;
+        const totalTokens = purchases.reduce((sum, p) => sum + p.tokens_purchased, 0);
+        const uniqueProperties = new Set(purchases.map(p => p.property_id));
+
+        const investmentMap = new Map();
+        purchases.forEach(p => {
+          if (!investmentMap.has(p.property_id)) {
+            investmentMap.set(p.property_id, {
+              property_title: (p.properties as any)?.title || "Unknown",
+              tokens: 0,
+              value: 0,
+            });
+          }
+          const inv = investmentMap.get(p.property_id);
+          inv.tokens += p.tokens_purchased;
+          inv.value += Number(p.total_amount);
+        });
 
         setPortfolio({
-          total_value: totalValue,
-          total_tokens: totalTokens,
-          properties_count: uniqueProperties,
+          totalValue,
+          totalTokens,
+          propertiesCount: uniqueProperties.size,
+          investments: Array.from(investmentMap.values()),
         });
       }
     } catch (error: any) {
-      toast.error("Failed to load data");
+      console.error("Error loading data:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleInvest = (property: Property) => {
+    setSelectedProperty(property);
+    setInvestDialogOpen(true);
+  };
+
+  if (loading) {
+    return <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">Loading...</div>;
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      {loading ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-6">My Portfolio</h2>
+        <div className="grid md:grid-cols-3 gap-6">
+          <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total Value</CardTitle><Wallet className="h-5 w-5 text-accent" /></CardHeader><CardContent><div className="text-3xl font-bold">${portfolio.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div><p className="text-xs text-muted-foreground mt-1">Across {portfolio.propertiesCount} properties</p></CardContent></Card>
+          <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total Tokens</CardTitle><TrendingUp className="h-5 w-5 text-accent" /></CardHeader><CardContent><div className="text-3xl font-bold">{portfolio.totalTokens.toLocaleString()}</div><p className="text-xs text-muted-foreground mt-1">Property ownership tokens</p></CardContent></Card>
+          <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Properties</CardTitle><Building2 className="h-5 w-5 text-accent" /></CardHeader><CardContent><div className="text-3xl font-bold">{portfolio.propertiesCount}</div><p className="text-xs text-muted-foreground mt-1">Diversified investments</p></CardContent></Card>
         </div>
-      ) : (
-        <div className="space-y-8">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary via-secondary to-accent p-8">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
-            <div className="relative flex items-center gap-3 mb-6">
-              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-                <TrendingUp className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-white">My Investment Portfolio</h2>
-                <p className="text-white/90">Track your tokenized real estate investments</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-              <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all hover:-translate-y-1">
-                <CardHeader>
-                  <CardDescription className="text-white/80">Total Investment Value</CardDescription>
-                  <CardTitle className="text-4xl text-white">${portfolio.total_value.toLocaleString()}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-white/70">Across all properties</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all hover:-translate-y-1">
-                <CardHeader>
-                  <CardDescription className="text-white/80">Total Tokens Owned</CardDescription>
-                  <CardTitle className="text-4xl text-white">{portfolio.total_tokens.toLocaleString()}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-white/70">Real estate tokens</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all hover:-translate-y-1">
-                <CardHeader>
-                  <CardDescription className="text-white/80">Properties Invested</CardDescription>
-                  <CardTitle className="text-4xl text-white">{portfolio.properties_count}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-white/70">Diversified portfolio</p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
 
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-3xl font-bold gradient-text">Marketplace</h3>
-                <p className="text-muted-foreground text-lg">Explore tokenized properties</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {properties.length > 0 ? (
-                properties.map((property) => {
-                  const tokens = property.property_tokens[0];
-                  const images = property.property_images || [];
-                  return (
-                    <Card key={property.id} className="border-2 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 transition-all hover:-translate-y-1 overflow-hidden group">
-                      <div className="relative">
-                        {images.length > 0 ? (
-                          <Carousel className="w-full">
-                            <CarouselContent>
-                              {images.map((img, idx) => (
-                                <CarouselItem key={idx}>
-                                  <div className="relative">
-                                    <img
-                                      src={img}
-                                      alt={`${property.title} - Image ${idx + 1}`}
-                                      className="w-full h-64 object-cover"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                                  </div>
-                                </CarouselItem>
-                              ))}
-                            </CarouselContent>
-                            {images.length > 1 && (
-                              <>
-                                <CarouselPrevious className="left-2 bg-background/80 backdrop-blur-sm border-0 hover:bg-background/95" />
-                                <CarouselNext className="right-2 bg-background/80 backdrop-blur-sm border-0 hover:bg-background/95" />
-                              </>
-                            )}
-                          </Carousel>
-                        ) : (
-                          <div className="w-full h-64 bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
-                            <Building2 className="h-16 w-16 text-accent/40" />
-                          </div>
-                        )}
-                        <div className="absolute top-3 right-3">
-                          <div className="px-4 py-2 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold capitalize shadow-lg backdrop-blur-sm">
-                            {property.property_type}
-                          </div>
-                        </div>
+        {portfolio.investments.length > 0 && (
+          <Card className="mt-6"><CardHeader><CardTitle>My Investments</CardTitle><CardDescription>Properties you've invested in</CardDescription></CardHeader><CardContent><div className="space-y-4">{portfolio.investments.map((inv, idx) => (<div key={idx} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"><div className="flex items-center gap-3"><Building2 className="h-8 w-8 text-accent" /><div><p className="font-semibold">{inv.property_title}</p><p className="text-sm text-muted-foreground">{inv.tokens} tokens owned</p></div></div><div className="text-right"><p className="text-lg font-bold">${inv.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p><p className="text-xs text-muted-foreground">Investment value</p></div></div>))}</div></CardContent></Card>
+        )}
+      </div>
+
+      <div><h2 className="text-2xl font-bold mb-6">Available Properties</h2>{properties.length === 0 ? (<Card><CardContent className="py-12 text-center"><Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" /><p className="text-muted-foreground">No properties available for investment</p></CardContent></Card>) : (<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">{properties.map((property) => {
+        const tokenData = property.property_tokens[0];
+        if (!tokenData) return null;
+        const tokensAvailable = tokenData.available_tokens;
+        const totalTokens = tokenData.total_tokens;
+        const percentageSold = ((totalTokens - tokensAvailable) / totalTokens) * 100;
+
+        return (
+          <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <Carousel className="w-full">
+              <CarouselContent>
+                {property.property_images && property.property_images.length > 0 ? (
+                  property.property_images.map((image: string, idx: number) => (
+                    <CarouselItem key={idx}>
+                      <div className="aspect-video relative">
+                        <img src={image} alt={`${property.title} - Image ${idx + 1}`} className="w-full h-full object-cover" />
                       </div>
-                      <CardHeader>
-                        <CardTitle className="line-clamp-1">{property.title}</CardTitle>
-                        <CardDescription className="flex items-start gap-1">
-                          <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                          <span className="line-clamp-1">{property.address}</span>
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          <div className="bg-accent-light p-3 rounded-lg">
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-sm text-muted-foreground">Property Value</span>
-                              <span className="text-lg font-bold text-accent">${Number(property.valuation).toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between items-center text-sm">
-                              <span className="text-muted-foreground">Total Tokens</span>
-                              <span className="font-medium">{tokens ? Number(tokens.total_tokens).toLocaleString() : '0'}</span>
-                            </div>
-                          </div>
-                          
-                          {tokens && (
-                            <div className="space-y-2">
-                              <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Available:</span>
-                                <span className="font-semibold text-foreground">{Number(tokens.available_tokens).toLocaleString()} tokens</span>
-                              </div>
-                              <div className="w-full bg-muted rounded-full h-2">
-                                <div
-                                  className="bg-accent h-2 rounded-full transition-all"
-                                  style={{
-                                    width: `${((tokens.total_tokens - tokens.available_tokens) / tokens.total_tokens) * 100}%`,
-                                  }}
-                                />
-                              </div>
-                              <div className="flex justify-between text-xs text-muted-foreground">
-                                <span>{Math.round(((tokens.total_tokens - tokens.available_tokens) / tokens.total_tokens) * 100)}% sold</span>
-                                <span>{tokens.available_tokens} left</span>
-                              </div>
-                            </div>
-                          )}
-
-                          <div className="pt-2 border-t border-border">
-                            <div className="flex justify-between items-baseline">
-                              <span className="text-sm text-muted-foreground">Price per Token</span>
-                              <span className="text-xl font-bold text-accent">${tokens ? Number(tokens.price_per_token).toFixed(2) : '0'}</span>
-                            </div>
-                          </div>
-                          
-                          <Button 
-                            className="w-full mt-2 bg-gradient-to-r from-accent to-accent-dark hover:from-accent-dark hover:to-accent" 
-                            size="lg"
-                            onClick={() => {
-                              setSelectedProperty(property);
-                              setInvestDialogOpen(true);
-                            }}
-                            disabled={!tokens || tokens.available_tokens === 0}
-                          >
-                            {tokens && tokens.available_tokens > 0 ? "Invest Now" : "Sold Out"}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })
-              ) : (
-                <div className="col-span-full">
-                  <Card className="border-2 border-dashed">
-                    <CardContent className="flex flex-col items-center justify-center py-16">
-                      <Building2 className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No Properties Available</h3>
-                      <p className="text-muted-foreground text-center">Check back soon for new investment opportunities</p>
-                    </CardContent>
-                  </Card>
-                </div>
+                    </CarouselItem>
+                  ))
+                ) : (
+                  <CarouselItem>
+                    <div className="aspect-video bg-muted flex items-center justify-center">
+                      <Building2 className="h-12 w-12 text-muted-foreground" />
+                    </div>
+                  </CarouselItem>
+                )}
+              </CarouselContent>
+              {property.property_images && property.property_images.length > 1 && (
+                <>
+                  <CarouselPrevious className="left-2" />
+                  <CarouselNext className="right-2" />
+                </>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-      
-      <InvestDialog
-        property={selectedProperty}
-        open={investDialogOpen}
-        onOpenChange={setInvestDialogOpen}
-        onSuccess={loadData}
-      />
+            </Carousel>
+            <CardContent className="p-6">
+              <div className="mb-4">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-bold text-lg">{property.title}</h3>
+                  <Badge variant="secondary">{property.property_type}</Badge>
+                </div>
+                <div className="flex items-start gap-1 text-sm text-muted-foreground mb-4">
+                  <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                  <span>{property.address}</span>
+                </div>
+                {property.description && (
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{property.description}</p>
+                )}
+                <div className="space-y-3 bg-muted/50 p-4 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Property Value</span>
+                    <span className="font-bold text-lg">${Number(property.valuation).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Coins className="h-4 w-4" />Price per Token
+                    </span>
+                    <span className="font-semibold">${Number(tokenData.price_per_token).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Available</span>
+                    <span className="font-semibold text-accent">{tokensAvailable.toLocaleString()} / {totalTokens.toLocaleString()}</span>
+                  </div>
+                  <div className="pt-2">
+                    <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+                      <span>Funding Progress</span>
+                      <span className="font-medium">{percentageSold.toFixed(1)}%</span>
+                    </div>
+                    <div className="h-2 bg-background rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-primary to-accent transition-all" style={{ width: `${percentageSold}%` }} />
+                    </div>
+                  </div>
+                </div>
+                {property.highlights && (
+                  <div className="mt-4 text-xs text-muted-foreground bg-accent-light p-3 rounded">
+                    <p className="font-medium mb-1">Key Highlights:</p>
+                    <p className="line-clamp-2">{property.highlights}</p>
+                  </div>
+                )}
+              </div>
+              <Button className="w-full" onClick={() => handleInvest(property)} disabled={tokensAvailable === 0}>
+                {tokensAvailable === 0 ? "Sold Out" : "Invest Now"}
+              </Button>
+            </CardContent>
+          </Card>
+        );
+      })}</div>)}</div>
+
+      <InvestDialog property={selectedProperty} open={investDialogOpen} onOpenChange={setInvestDialogOpen} onSuccess={loadData} />
     </div>
   );
 };
