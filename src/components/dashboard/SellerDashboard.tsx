@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, TrendingUp, Plus, Coins, DollarSign, Clock, CheckCircle, XCircle, Eye } from "lucide-react";
-import { PropertyListingDialog } from "./PropertyListingDialog";
+import PropertyListingDialog from "./PropertyListingDialog";
 import { PropertyDetailsDialog } from "./PropertyDetailsDialog";
 import KYCVerification from "./KYCVerification";
 
