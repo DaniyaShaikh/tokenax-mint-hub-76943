@@ -85,13 +85,17 @@ const KYCSteps = ({ verificationType, onComplete }: KYCStepsProps) => {
         submittedAt: new Date().toISOString(),
       };
 
-      const { error } = await supabase.from("kyc_verifications").insert({
-        user_id: user.data.user.id,
-        verification_type: verificationType,
-        company_name: verificationType === "kyb" ? formData.companyName : null,
-        status: "pending",
-        verification_data: verificationData,
-      });
+      const { data: newRecord, error } = await supabase
+        .from("kyc_verifications")
+        .insert({
+          user_id: user.data.user.id,
+          verification_type: verificationType,
+          company_name: verificationType === "kyb" ? formData.companyName : null,
+          status: "pending",
+          verification_data: verificationData,
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
@@ -105,11 +109,15 @@ const KYCSteps = ({ verificationType, onComplete }: KYCStepsProps) => {
             status: "approved",
             verified_at: new Date().toISOString()
           })
-          .eq("user_id", user.data.user.id);
+          .eq("id", newRecord.id);
 
         if (!updateError) {
           toast.success("KYC Approved! Welcome aboard!");
-          onComplete();
+          setTimeout(() => {
+            onComplete();
+          }, 500);
+        } else {
+          console.error("Failed to approve KYC:", updateError);
         }
       }, 2000);
       
