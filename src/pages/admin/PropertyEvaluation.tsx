@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CheckCircle, XCircle, MapPin, DollarSign, Home, Eye, FileText, Calendar } from "lucide-react";
+import { CheckCircle, XCircle, MapPin, DollarSign, Home, Eye, FileText, Calendar, User } from "lucide-react";
 import { toast } from "sonner";
 
 interface Property {
@@ -200,27 +200,36 @@ const PropertyEvaluation = () => {
                     <DialogTitle className="text-3xl gradient-text">{property.title}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-6">
-                    {/* Property Images */}
+                    {/* Property Images Gallery */}
                     {property.property_images && property.property_images.length > 0 && (
-                      <div className="grid grid-cols-2 gap-4">
-                        {property.property_images.map((img, idx) => (
-                          <div key={idx} className="relative aspect-video rounded-lg overflow-hidden">
-                            <img
-                              src={img}
-                              alt={`${property.title} - Image ${idx + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ))}
+                      <div className="space-y-3">
+                        <h4 className="font-semibold text-lg text-primary flex items-center gap-2">
+                          <Eye className="h-5 w-5" />
+                          Property Images
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {property.property_images.map((img, idx) => (
+                            <div key={idx} className="relative aspect-video rounded-xl overflow-hidden shadow-lg border-2 border-border hover:border-primary/50 transition-all">
+                              <img
+                                src={img}
+                                alt={`${property.title} - Image ${idx + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                                <p className="text-white text-sm font-medium">Image {idx + 1}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
 
                     {/* Key Metrics */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5 rounded-xl">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5 rounded-xl border-2 border-primary/10">
                       <div>
                         <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
                           <DollarSign className="h-3 w-3" />
-                          Valuation
+                          Property Valuation
                         </p>
                         <p className="text-2xl font-bold text-accent">
                           ${Number(property.valuation).toLocaleString()}
@@ -239,11 +248,29 @@ const PropertyEvaluation = () => {
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground mb-1">Submitted By</p>
-                        <p className="text-lg font-medium text-foreground">
-                          {property.profiles.full_name || "Unknown"}
+                        <p className="text-sm text-muted-foreground mb-1">Token Value</p>
+                        <p className="text-xl font-bold text-accent">
+                          ${property.expected_tokens ? (Number(property.valuation) / property.expected_tokens).toFixed(2) : "N/A"}
                         </p>
-                        <p className="text-xs text-muted-foreground">{property.profiles.email}</p>
+                        <p className="text-xs text-muted-foreground">per token</p>
+                      </div>
+                    </div>
+
+                    {/* Owner Information */}
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-lg text-primary flex items-center gap-2">
+                        <User className="h-5 w-5" />
+                        Property Owner
+                      </h4>
+                      <div className="p-4 bg-muted/30 rounded-lg space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Name:</span>
+                          <span className="font-medium">{property.profiles.full_name || "Not provided"}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Email:</span>
+                          <span className="font-medium">{property.profiles.email}</span>
+                        </div>
                       </div>
                     </div>
 
@@ -353,7 +380,7 @@ const PropertyEvaluation = () => {
               <div className="flex gap-2 pt-2">
                 <Button
                   onClick={() => handleAction(property.id, "approved")}
-                  className="flex-1 bg-gradient-to-r from-success to-success/80 hover:shadow-lg hover:shadow-success/25 rounded-full text-white font-semibold"
+                  className="flex-1 bg-success hover:bg-success/90 text-white hover:shadow-lg hover:shadow-success/25 rounded-full font-semibold"
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Approve for Tokenization
