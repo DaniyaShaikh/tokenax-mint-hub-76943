@@ -7,9 +7,7 @@ const HeroSection = () => {
     "Real Estate",
     "Physical Assets",
     "Digital Assets",
-    "Commodities",
-    "Art & Collectibles",
-    "Precious Metals"
+    "Any Assets"
   ];
   
   const [currentAssetIndex, setCurrentAssetIndex] = useState(0);
