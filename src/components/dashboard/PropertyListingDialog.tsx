@@ -71,7 +71,7 @@ export const PropertyListingDialog = ({ open, onOpenChange, onSuccess }: Propert
         description: formData.description || null,
         highlights: formData.highlights || null,
         property_images: images,
-        status: "pending_review",
+        status: "pending",
       });
 
       if (error) throw error;
