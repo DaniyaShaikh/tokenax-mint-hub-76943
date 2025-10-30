@@ -78,8 +78,8 @@ const Properties = () => {
   };
 
   const renderPropertyCard = (property: Property) => (
-    <Card key={property.id} className="overflow-hidden">
-      <div className="aspect-video bg-muted relative">
+    <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+      <div className="aspect-[4/3] bg-muted relative">
         {property.property_images?.[0] ? (
           <img
             src={property.property_images[0]}
@@ -87,24 +87,23 @@ const Properties = () => {
             className="object-cover w-full h-full"
           />
         ) : (
-          <div className="flex items-center justify-center h-full">
-            <Building2 className="h-12 w-12 text-muted-foreground" />
+          <div className="flex items-center justify-center h-full bg-gradient-to-br from-muted to-muted/50">
+            <Building2 className="h-10 w-10 text-muted-foreground/40" />
           </div>
         )}
         <div className="absolute top-2 right-2">
           {getStatusBadge(property.status)}
         </div>
       </div>
-      <CardContent className="pt-4">
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="font-semibold line-clamp-1">{property.title}</h3>
+      <CardContent className="p-4">
+        <h3 className="font-semibold line-clamp-1 mb-2">{property.title}</h3>
+        <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
+          <span className="capitalize">{property.property_type}</span>
+          <span className="font-semibold text-foreground">${Number(property.valuation).toLocaleString()}</span>
         </div>
-        <p className="text-sm text-muted-foreground mb-1">{property.property_type}</p>
-        <p className="text-sm text-muted-foreground mb-1 line-clamp-1">{property.address}</p>
-        <p className="text-sm font-medium mb-3">${Number(property.valuation).toLocaleString()}</p>
         {property.rejection_reason && (
-          <p className="text-xs text-destructive mb-3 line-clamp-2">
-            Reason: {property.rejection_reason}
+          <p className="text-xs text-destructive mb-3 line-clamp-2 p-2 bg-destructive/10 rounded">
+            {property.rejection_reason}
           </p>
         )}
         <Button
@@ -163,58 +162,82 @@ const Properties = () => {
         <>
           {/* Tokenized Properties */}
           {propertyGroups.tokenized.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                <h3 className="text-xl font-semibold">Tokenized Properties</h3>
-                <Badge variant="default">{propertyGroups.tokenized.length}</Badge>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {propertyGroups.tokenized.map(renderPropertyCard)}
-              </div>
-            </div>
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CardTitle>Tokenized Properties</CardTitle>
+                    <Badge variant="default">{propertyGroups.tokenized.length}</Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {propertyGroups.tokenized.slice(0, 6).map(renderPropertyCard)}
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Pending Properties */}
           {propertyGroups.pending.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-yellow-500" />
-                <h3 className="text-xl font-semibold">Pending Review</h3>
-                <Badge variant="secondary">{propertyGroups.pending.length}</Badge>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {propertyGroups.pending.map(renderPropertyCard)}
-              </div>
-            </div>
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-yellow-500" />
+                    <CardTitle>Pending Review</CardTitle>
+                    <Badge variant="secondary">{propertyGroups.pending.length}</Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {propertyGroups.pending.slice(0, 4).map(renderPropertyCard)}
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Draft Properties */}
           {propertyGroups.draft.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-muted-foreground" />
-                <h3 className="text-xl font-semibold">Draft Properties</h3>
-                <Badge variant="outline">{propertyGroups.draft.length}</Badge>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {propertyGroups.draft.map(renderPropertyCard)}
-              </div>
-            </div>
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle>Draft Properties</CardTitle>
+                    <Badge variant="outline">{propertyGroups.draft.length}</Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {propertyGroups.draft.slice(0, 4).map(renderPropertyCard)}
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Rejected Properties */}
           {propertyGroups.rejected.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <XCircle className="h-5 w-5 text-red-500" />
-                <h3 className="text-xl font-semibold">Rejected Properties</h3>
-                <Badge variant="destructive">{propertyGroups.rejected.length}</Badge>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {propertyGroups.rejected.map(renderPropertyCard)}
-              </div>
-            </div>
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <XCircle className="h-5 w-5 text-red-500" />
+                    <CardTitle>Rejected Properties</CardTitle>
+                    <Badge variant="destructive">{propertyGroups.rejected.length}</Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {propertyGroups.rejected.slice(0, 4).map(renderPropertyCard)}
+                </div>
+              </CardContent>
+            </Card>
           )}
         </>
       )}
