@@ -63,7 +63,11 @@ const SellerDashboard = () => {
         .order("created_at", { ascending: false });
 
       if (propertiesData) {
-        setProperties(propertiesData);
+        const mappedProperties = propertiesData.map((prop: any) => ({
+          ...prop,
+          property_tokens: prop.property_tokens ? [prop.property_tokens] : undefined
+        }));
+        setProperties(mappedProperties);
       }
     } catch (error: any) {
       console.error("Error loading data:", error);

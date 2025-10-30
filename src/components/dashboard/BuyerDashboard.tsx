@@ -13,14 +13,14 @@ interface Property {
   address: string;
   valuation: number;
   property_type: string;
-  property_images: string[];
+  property_images: any;
   description?: string;
   highlights?: string;
-  property_tokens: {
+  property_tokens: Array<{
     total_tokens: number;
     available_tokens: number;
     price_per_token: number;
-  }[];
+  }>;
 }
 
 interface Portfolio {
@@ -60,7 +60,14 @@ const BuyerDashboard = () => {
         .select(`*, property_tokens (total_tokens, available_tokens, price_per_token)`)
         .eq("status", "tokenized");
 
-      setProperties(propertiesData || []);
+      if (propertiesData) {
+        const mappedProperties = propertiesData.map((prop: any) => ({
+          ...prop,
+          property_tokens: prop.property_tokens ? [prop.property_tokens] : [],
+          property_images: Array.isArray(prop.property_images) ? prop.property_images : []
+        }));
+        setProperties(mappedProperties);
+      }
 
       const { data: purchases } = await supabase
         .from("token_purchases")
