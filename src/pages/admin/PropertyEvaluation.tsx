@@ -20,6 +20,7 @@ interface Property {
   created_at: string;
   expected_tokens: number;
   admin_notes: string;
+  property_images: string[];
   profiles: {
     email: string;
     full_name: string;
@@ -189,28 +190,133 @@ const PropertyEvaluation = () => {
               {/* View Full Details */}
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full" onClick={() => setSelectedProperty(property)}>
                     <Eye className="h-4 w-4 mr-2" />
                     View Full Details
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>{property.title}</DialogTitle>
+                    <DialogTitle className="text-3xl gradient-text">{property.title}</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-semibold mb-2">Full Address</h4>
-                      <p className="text-sm">{property.address}</p>
+                  <div className="space-y-6">
+                    {/* Property Images */}
+                    {property.property_images && property.property_images.length > 0 && (
+                      <div className="grid grid-cols-2 gap-4">
+                        {property.property_images.map((img, idx) => (
+                          <div key={idx} className="relative aspect-video rounded-lg overflow-hidden">
+                            <img
+                              src={img}
+                              alt={`${property.title} - Image ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Key Metrics */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5 rounded-xl">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
+                          <DollarSign className="h-3 w-3" />
+                          Valuation
+                        </p>
+                        <p className="text-2xl font-bold text-accent">
+                          ${Number(property.valuation).toLocaleString()}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Property Type</p>
+                        <p className="text-xl font-bold text-primary capitalize">
+                          {property.property_type}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Expected Tokens</p>
+                        <p className="text-xl font-bold text-secondary">
+                          {property.expected_tokens?.toLocaleString() || "Not specified"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Submitted By</p>
+                        <p className="text-lg font-medium text-foreground">
+                          {property.profiles.full_name || "Unknown"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{property.profiles.email}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold mb-2">Complete Description</h4>
-                      <p className="text-sm whitespace-pre-wrap">{property.description}</p>
+
+                    {/* Full Address */}
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-lg text-primary flex items-center gap-2">
+                        <MapPin className="h-5 w-5" />
+                        Property Address
+                      </h4>
+                      <p className="text-base leading-relaxed p-4 bg-muted/30 rounded-lg">
+                        {property.address}
+                      </p>
                     </div>
-                    <div>
-                      <h4 className="font-semibold mb-2">Property Highlights</h4>
-                      <p className="text-sm whitespace-pre-wrap">{property.highlights}</p>
+
+                    {/* Complete Description */}
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-lg text-primary flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        Property Description
+                      </h4>
+                      <p className="text-base leading-relaxed whitespace-pre-wrap p-4 bg-muted/30 rounded-lg">
+                        {property.description}
+                      </p>
                     </div>
+
+                    {/* Property Highlights */}
+                    {property.highlights && (
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-lg text-primary flex items-center gap-2">
+                          <Home className="h-5 w-5" />
+                          Key Highlights
+                        </h4>
+                        <p className="text-base leading-relaxed whitespace-pre-wrap p-4 bg-accent/5 rounded-lg">
+                          {property.highlights}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Timeline */}
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-lg text-primary flex items-center gap-2">
+                        <Calendar className="h-5 w-5" />
+                        Submission Details
+                      </h4>
+                      <div className="p-4 bg-muted/30 rounded-lg space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Submitted On:</span>
+                          <span className="font-medium">
+                            {new Date(property.created_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Status:</span>
+                          <span className="font-medium capitalize">{property.status}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Admin Notes if any */}
+                    {property.admin_notes && (
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-lg text-primary">Admin Notes</h4>
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap p-4 bg-primary/5 rounded-lg border-l-4 border-primary">
+                          {property.admin_notes}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </DialogContent>
               </Dialog>
@@ -247,7 +353,7 @@ const PropertyEvaluation = () => {
               <div className="flex gap-2 pt-2">
                 <Button
                   onClick={() => handleAction(property.id, "approved")}
-                  className="flex-1 bg-gradient-to-r from-success to-success/80 hover:shadow-lg hover:shadow-success/25 rounded-full"
+                  className="flex-1 bg-gradient-to-r from-success to-success/80 hover:shadow-lg hover:shadow-success/25 rounded-full text-white font-semibold"
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Approve for Tokenization
@@ -255,7 +361,7 @@ const PropertyEvaluation = () => {
                 <Button
                   variant="destructive"
                   onClick={() => handleAction(property.id, "rejected")}
-                  className="flex-1 rounded-full"
+                  className="flex-1 rounded-full font-semibold"
                   disabled={!rejectionReasons[property.id]}
                 >
                   <XCircle className="h-4 w-4 mr-2" />
