@@ -127,9 +127,12 @@ const AdminOverview = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-primary mb-2">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Welcome to the Tokenax backoffice platform</p>
+      <div className="relative overflow-hidden bg-gradient-to-r from-primary via-secondary to-accent p-8 rounded-3xl">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
+        <div className="relative">
+          <h1 className="text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
+          <p className="text-white/90 text-lg">Welcome to the TokenaX management platform</p>
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -137,7 +140,7 @@ const AdminOverview = () => {
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Card key={index} className="relative overflow-hidden group hover:shadow-accent transition-all duration-300">
+            <Card key={index} className="relative overflow-hidden group border-2 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10 transition-all hover:-translate-y-1">
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-accent/5 to-transparent rounded-full -mr-16 -mt-16" />
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">

@@ -109,68 +109,85 @@ const Analytics = () => {
     );
   }
 
-  const COLORS = ["hsl(195, 100%, 50%)", "hsl(218, 65%, 14%)", "hsl(142, 76%, 36%)", "hsl(38, 92%, 50%)", "hsl(0, 84%, 60%)"];
+  const COLORS = [
+    "hsl(250, 75%, 60%)",  // primary
+    "hsl(280, 70%, 55%)",  // secondary
+    "hsl(145, 65%, 50%)",  // success
+    "hsl(35, 100%, 55%)",  // warning
+    "hsl(0, 75%, 55%)"     // destructive
+  ];
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-primary">Analytics Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Platform performance and insights</p>
+      <div className="relative overflow-hidden bg-gradient-to-r from-primary via-secondary to-accent p-8 rounded-3xl">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
+        <div className="relative">
+          <h1 className="text-4xl font-bold text-white mb-2">Analytics Dashboard</h1>
+          <p className="text-white/90 text-lg">Platform performance and insights</p>
+        </div>
       </div>
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-accent/10 to-card">
+        <Card className="border-2 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10 transition-all hover:-translate-y-1">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Users
             </CardTitle>
-            <Users className="h-5 w-5 text-accent" />
+            <div className="p-2 bg-gradient-to-br from-primary to-secondary rounded-xl">
+              <Users className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-accent">{data.totalUsers}</div>
+            <div className="text-4xl font-bold gradient-text">{data.totalUsers}</div>
             <p className="text-xs text-muted-foreground mt-1">Active platform users</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-primary/10 to-card">
+        <Card className="border-2 hover:border-secondary/30 hover:shadow-xl hover:shadow-secondary/10 transition-all hover:-translate-y-1">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Properties
             </CardTitle>
-            <Building2 className="h-5 w-5 text-primary" />
+            <div className="p-2 bg-gradient-to-br from-secondary to-accent rounded-xl">
+              <Building2 className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-primary">{data.totalProperties}</div>
+            <div className="text-4xl font-bold gradient-text">{data.totalProperties}</div>
             <p className="text-xs text-muted-foreground mt-1">Listed on platform</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-success/10 to-card">
+        <Card className="border-2 hover:border-success/30 hover:shadow-xl hover:shadow-success/10 transition-all hover:-translate-y-1">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Tokens Sold
             </CardTitle>
-            <Coins className="h-5 w-5 text-success" />
+            <div className="p-2 bg-gradient-to-br from-success to-success/80 rounded-xl">
+              <Coins className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-success">
+            <div className="text-4xl font-bold text-success">
               {data.totalTokensSold.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-1">Across all properties</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-accent/10 to-card">
+        <Card className="border-2 hover:border-accent/30 hover:shadow-xl hover:shadow-accent/10 transition-all hover:-translate-y-1">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Revenue
             </CardTitle>
-            <DollarSign className="h-5 w-5 text-accent" />
+            <div className="p-2 bg-gradient-to-br from-accent to-primary rounded-xl">
+              <DollarSign className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-accent">
+            <div className="text-4xl font-bold gradient-text">
               ${data.totalRevenue.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-1">Platform revenue</p>
@@ -180,42 +197,46 @@ const Analytics = () => {
 
       {/* Approval Rates */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+        <Card className="border-2 hover:border-success/30 hover:shadow-xl hover:shadow-success/10 transition-all">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-success" />
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <div className="p-2 bg-gradient-to-br from-success to-success/80 rounded-xl">
+                <TrendingUp className="h-5 w-5 text-white" />
+              </div>
               KYC Approval Rate
             </CardTitle>
             <CardDescription>Percentage of approved verifications</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-5xl font-bold text-success mb-2">
+            <div className="text-6xl font-bold text-success mb-4">
               {data.kycApprovalRate.toFixed(1)}%
             </div>
-            <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-muted rounded-full h-4 overflow-hidden">
               <div
-                className="bg-success h-full transition-all duration-500"
+                className="bg-gradient-to-r from-success to-success/80 h-full transition-all duration-500 rounded-full"
                 style={{ width: `${data.kycApprovalRate}%` }}
               />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-2 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10 transition-all">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-accent" />
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <div className="p-2 bg-gradient-to-br from-primary to-secondary rounded-xl">
+                <TrendingUp className="h-5 w-5 text-white" />
+              </div>
               Property Approval Rate
             </CardTitle>
             <CardDescription>Percentage of approved properties</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-5xl font-bold text-accent mb-2">
+            <div className="text-6xl font-bold gradient-text mb-4">
               {data.propertyApprovalRate.toFixed(1)}%
             </div>
-            <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-muted rounded-full h-4 overflow-hidden">
               <div
-                className="bg-accent h-full transition-all duration-500"
+                className="bg-gradient-to-r from-primary to-secondary h-full transition-all duration-500 rounded-full"
                 style={{ width: `${data.propertyApprovalRate}%` }}
               />
             </div>
@@ -225,9 +246,9 @@ const Analytics = () => {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="border-2 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10 transition-all">
           <CardHeader>
-            <CardTitle>Property Status Distribution</CardTitle>
+            <CardTitle className="text-2xl">Property Status Distribution</CardTitle>
             <CardDescription>Breakdown of property statuses</CardDescription>
           </CardHeader>
           <CardContent className="h-80">
@@ -239,7 +260,7 @@ const Analytics = () => {
                   cy="50%"
                   labelLine={false}
                   label={(entry) => `${entry.name}: ${entry.value}`}
-                  outerRadius={80}
+                  outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
                 >
@@ -254,9 +275,9 @@ const Analytics = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-2 hover:border-secondary/30 hover:shadow-xl hover:shadow-secondary/10 transition-all">
           <CardHeader>
-            <CardTitle>Top Properties by Revenue</CardTitle>
+            <CardTitle className="text-2xl">Top Properties by Revenue</CardTitle>
             <CardDescription>Highest earning properties</CardDescription>
           </CardHeader>
           <CardContent className="h-80">
@@ -279,11 +300,17 @@ const Analytics = () => {
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
                     border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
+                    borderRadius: "12px",
                   }}
                   formatter={(value: any) => [`$${value.toLocaleString()}`, "Revenue"]}
                 />
-                <Bar dataKey="revenue" fill="hsl(195, 100%, 50%)" radius={[8, 8, 0, 0]} />
+                <defs>
+                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(250, 75%, 60%)" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="hsl(280, 70%, 55%)" stopOpacity={0.8}/>
+                  </linearGradient>
+                </defs>
+                <Bar dataKey="revenue" fill="url(#colorRevenue)" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
