@@ -25,49 +25,57 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-b border-border/50 shadow-sm">
+      <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          <div className="flex items-center">
-            <a href={isAuthenticated ? "/dashboard" : "/"}>
-              <img src={tokenaxLogo} alt="TokenaX" className="h-10 w-auto" />
-            </a>
-          </div>
-          
+          <a 
+            href={isAuthenticated ? "/dashboard" : "/"} 
+            className="flex items-center space-x-3 group"
+          >
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-lg blur-sm opacity-50 group-hover:opacity-75 transition-opacity" />
+              <img 
+                src={tokenaxLogo} 
+                alt="TokenaX" 
+                className="h-10 w-auto relative z-10"
+              />
+            </div>
+          </a>
+
           {!isAuthenticated && (
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
+            <div className="hidden md:flex items-center space-x-1">
+              <a href="#features" className="px-4 py-2 text-sm font-medium text-foreground/80 hover:text-primary hover:bg-muted/50 rounded-lg transition-all">
                 Features
               </a>
-              <a href="#how-it-works" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
+              <a href="#how-it-works" className="px-4 py-2 text-sm font-medium text-foreground/80 hover:text-primary hover:bg-muted/50 rounded-lg transition-all">
                 How It Works
               </a>
-              <a href="#marketplace" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
+              <a href="#marketplace" className="px-4 py-2 text-sm font-medium text-foreground/80 hover:text-primary hover:bg-muted/50 rounded-lg transition-all">
                 Marketplace
               </a>
             </div>
           )}
-          
-          <div className="flex items-center gap-4">
+
+          <div className="flex items-center space-x-3">
             {isAuthenticated ? (
-              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              <Button onClick={handleSignOut} variant="outline" className="rounded-full">
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
               </Button>
             ) : (
               <>
-                <Button variant="ghost" size="sm" onClick={() => window.location.href = '/auth'}>
+                <Button variant="ghost" className="rounded-full" onClick={() => window.location.href = '/auth'}>
                   Sign In
                 </Button>
-                <Button variant="hero" size="sm" onClick={() => window.location.href = '/auth'}>
+                <Button className="rounded-full bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/25 transition-all" onClick={() => window.location.href = '/auth'}>
                   Get Started
                 </Button>
               </>
             )}
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 };
 

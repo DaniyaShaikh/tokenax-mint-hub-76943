@@ -14,10 +14,22 @@ const Index = () => {
         <HowItWorksSection />
         <CTASection />
       </main>
-      <footer className="bg-primary text-primary-foreground py-8">
+      <footer className="bg-card border-t border-border py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-sm text-primary-foreground/70">
-            © 2025 TokenaX. All rights reserved. | Institutional-Grade Asset Tokenization Platform
+          <div className="text-center">
+            <div className="mb-4">
+              <img 
+                src="/lovable-uploads/b6da2701-5eb5-463e-8f3c-14e85ec82e3b.png" 
+                alt="TokenaX" 
+                className="h-8 w-auto mx-auto opacity-80"
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              © 2025 TokenaX. All rights reserved.
+            </p>
+            <p className="text-xs text-muted-foreground/70 mt-2">
+              Institutional-Grade Asset Tokenization Platform
+            </p>
           </div>
         </div>
       </footer>
