@@ -26,6 +26,76 @@ export const PropertyDetailsDialog = ({ propertyId, open, onOpenChange }: Proper
   const loadPropertyDetails = async () => {
     setLoading(true);
     try {
+      // Check if this is a sample property
+      if (propertyId.startsWith('sample-')) {
+        // Set dummy data for sample properties
+        const sampleData = {
+          id: propertyId,
+          title: propertyId === 'sample-1' ? 'Luxury Downtown Apartment' : 
+                 propertyId === 'sample-2' ? 'Commercial Office Space' : 'Suburban Family Home',
+          address: propertyId === 'sample-1' ? '123 Main Street, Downtown District' :
+                   propertyId === 'sample-2' ? '456 Business Ave, Financial District' : '789 Maple Lane, Suburban Area',
+          property_type: propertyId === 'sample-1' ? 'Residential' : 
+                         propertyId === 'sample-2' ? 'Commercial' : 'Residential',
+          valuation: propertyId === 'sample-1' ? 850000 : 
+                     propertyId === 'sample-2' ? 1200000 : 450000,
+          description: propertyId === 'sample-1' ? 
+            'Modern luxury apartment featuring floor-to-ceiling windows, premium finishes, and breathtaking city views. Located in the heart of downtown with easy access to shopping, dining, and entertainment.' :
+            propertyId === 'sample-2' ?
+            'Prime commercial office space in the central business district. Features modern amenities, high-speed elevators, and excellent transportation connections.' :
+            'Charming family home in a quiet suburban neighborhood with excellent schools nearby. Features spacious backyard, modern kitchen, and 4 bedrooms.',
+          highlights: propertyId === 'sample-1' ?
+            'Premium amenities, 24/7 concierge service, rooftop pool, state-of-the-art gym, secure parking' :
+            propertyId === 'sample-2' ?
+            'Grade A office building, high occupancy rate, premium corporate tenants, modern facilities' :
+            'Family-friendly neighborhood, top-rated schools, large backyard, renovated kitchen',
+          property_images: [],
+          property_tokens: [{
+            total_tokens: propertyId === 'sample-1' ? 10000 : propertyId === 'sample-2' ? 0 : 0,
+            available_tokens: propertyId === 'sample-1' ? 3500 : 0,
+            price_per_token: propertyId === 'sample-1' ? 85 : 0
+          }]
+        };
+
+        const samplePurchases = propertyId === 'sample-1' ? [
+          {
+            id: 'purchase-1',
+            tokens_purchased: 500,
+            total_amount: 42500,
+            purchased_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+            profiles: {
+              full_name: 'John Smith',
+              email: 'john.smith@example.com'
+            }
+          },
+          {
+            id: 'purchase-2',
+            tokens_purchased: 1000,
+            total_amount: 85000,
+            purchased_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+            profiles: {
+              full_name: 'Sarah Johnson',
+              email: 'sarah.j@example.com'
+            }
+          },
+          {
+            id: 'purchase-3',
+            tokens_purchased: 1500,
+            total_amount: 127500,
+            purchased_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+            profiles: {
+              full_name: 'Michael Chen',
+              email: 'm.chen@example.com'
+            }
+          }
+        ] : [];
+
+        setProperty(sampleData);
+        setPurchases(samplePurchases);
+        setLoading(false);
+        return;
+      }
+
       const { data: propData } = await supabase
         .from("properties")
         .select("*, property_tokens(*)")

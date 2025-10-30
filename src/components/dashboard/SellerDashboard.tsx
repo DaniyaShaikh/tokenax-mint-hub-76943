@@ -293,10 +293,9 @@ const SellerDashboard = () => {
                           variant="outline" 
                           className="w-full mt-2"
                           onClick={() => setSelectedPropertyId(property.id)}
-                          disabled={property.id.startsWith('sample-')}
                         >
                           <Eye className="h-4 w-4 mr-2" />
-                          {property.id.startsWith('sample-') ? 'Sample Property' : 'View Details'}
+                          View Details
                         </Button>
                       </div>
                     )}
