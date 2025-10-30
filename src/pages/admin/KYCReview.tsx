@@ -347,6 +347,7 @@ const KYCReview = () => {
                 <User className="h-5 w-5 text-primary" />
                 Personal Information
               </CardTitle>
+              <CardDescription>Basic identity details</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               <div>
@@ -432,6 +433,7 @@ const KYCReview = () => {
                 <Building className="h-5 w-5 text-secondary" />
                 Company Information
               </CardTitle>
+              <CardDescription>Tell us about your business</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               <div>
@@ -486,8 +488,11 @@ const KYCReview = () => {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-accent" />
-                Address Information
+                {isKYB ? "Business Address" : "Residential Address"}
               </CardTitle>
+              <CardDescription>
+                {isKYB ? "Where is your business located?" : "Where do you currently reside?"}
+              </CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
@@ -556,15 +561,28 @@ const KYCReview = () => {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <FileText className="h-5 w-5 text-success" />
-                Uploaded Documents
-                {editMode && <span className="text-sm text-muted-foreground ml-2">(Upload missing docs below)</span>}
+                {isKYB ? "Business Documents" : "Identification Documents"}
               </CardTitle>
+              <CardDescription>
+                {editMode 
+                  ? "Upload any missing documents below" 
+                  : isKYB 
+                    ? "Business verification documents" 
+                    : "Identity verification documents"}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
-                  <span className="text-sm font-medium">ID Document</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">
+                      {isKYB ? "Certificate of Incorporation" : "ID Document"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {isKYB ? "Official registration document" : "Passport/Driver's License"}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {data.documents.idDocument ? (
@@ -594,7 +612,14 @@ const KYCReview = () => {
               <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
-                  <span className="text-sm font-medium">Proof of Address</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">
+                      {isKYB ? "Proof of Business Address" : "Proof of Address"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {isKYB ? "Utility bill or lease agreement" : "Utility Bill/Bank Statement (less than 3 months)"}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {data.documents.proofOfAddress ? (
@@ -621,38 +646,41 @@ const KYCReview = () => {
                   )}
                 </div>
               </div>
-              {!isKYB && (
-                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  <div className="flex flex-col">
                     <span className="text-sm font-medium">Selfie Verification</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {data.documents.selfie ? (
-                      <Badge variant="default">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Uploaded
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary">
-                        <XCircle className="h-3 w-3 mr-1" />
-                        Missing
-                      </Badge>
-                    )}
-                    {editMode && !data.documents.selfie && (
-                      <Input
-                        type="file"
-                        accept=".jpg,.jpeg,.png"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) setDocFiles({ ...docFiles, selfie: file });
-                        }}
-                        className="w-48 text-xs"
-                      />
-                    )}
+                    <span className="text-xs text-muted-foreground">
+                      Photo holding ID document
+                    </span>
                   </div>
                 </div>
-              )}
+                <div className="flex items-center gap-2">
+                  {data.documents.selfie ? (
+                    <Badge variant="default">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Uploaded
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary">
+                      <XCircle className="h-3 w-3 mr-1" />
+                      Missing
+                    </Badge>
+                  )}
+                  {editMode && !data.documents.selfie && (
+                    <Input
+                      type="file"
+                      accept=".jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setDocFiles({ ...docFiles, selfie: file });
+                      }}
+                      className="w-48 text-xs"
+                    />
+                  )}
+                </div>
+              </div>
               {isKYB && (
                 <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                   <div className="flex items-center gap-2">
