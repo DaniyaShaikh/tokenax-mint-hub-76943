@@ -99,27 +99,37 @@ const KYCSteps = ({ verificationType, onComplete }: KYCStepsProps) => {
 
       if (error) throw error;
 
-      toast.success("Verification submitted! Processing...");
+      // Show processing message
+      toast.loading("Processing verification...", { id: "kyc-processing" });
       
-      // Simulate approval process (2 seconds)
+      // Auto-approve after 3 seconds for demo purposes
       setTimeout(async () => {
         const { error: updateError } = await supabase
           .from("kyc_verifications")
           .update({ 
             status: "approved",
-            verified_at: new Date().toISOString()
+            verified_at: new Date().toISOString(),
+            review_status: "approved"
           })
           .eq("id", newRecord.id);
 
         if (!updateError) {
-          toast.success("KYC Approved! Welcome aboard!");
+          // Dismiss loading toast and show success
+          toast.dismiss("kyc-processing");
+          toast.success("🎉 Verification Approved! Redirecting to dashboard...", { 
+            duration: 2000 
+          });
+          
+          // Wait for toast to show, then reload dashboard
           setTimeout(() => {
             onComplete();
-          }, 500);
+          }, 1500);
         } else {
+          toast.dismiss("kyc-processing");
+          toast.error("Approval failed. Please contact support.");
           console.error("Failed to approve KYC:", updateError);
         }
-      }, 2000);
+      }, 3000);
       
     } catch (error: any) {
       toast.error(error.message);
