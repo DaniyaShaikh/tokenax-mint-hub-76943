@@ -45,10 +45,10 @@ const HeroSection = () => {
             </span>
           </div>
           
-          <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
             <span className="gradient-text">Tokenize </span>
             <span 
-              className={`gradient-text italic inline-block min-w-[280px] sm:min-w-[400px] transition-all duration-300 ${
+              className={`gradient-text italic inline-block min-w-[200px] sm:min-w-[300px] lg:min-w-[350px] transition-all duration-300 ${
                 isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
               }`}
             >
