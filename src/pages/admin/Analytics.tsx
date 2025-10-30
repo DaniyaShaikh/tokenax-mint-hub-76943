@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { BarChart3, TrendingUp, Users, Building2, Coins, DollarSign } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LabelList } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 interface AnalyticsData {
   totalUsers: number;
@@ -109,12 +110,20 @@ const Analytics = () => {
     );
   }
 
-  const COLORS = [
-    "hsl(250, 75%, 60%)",  // primary
-    "hsl(280, 70%, 55%)",  // secondary
-    "hsl(145, 65%, 50%)",  // success
-    "hsl(35, 100%, 55%)",  // warning
-    "hsl(0, 75%, 55%)"     // destructive
+  const COLORS = {
+    tokenized: "hsl(250, 75%, 60%)",
+    approved: "hsl(280, 70%, 55%)",
+    pending: "hsl(145, 65%, 50%)",
+    rejected: "hsl(0, 75%, 55%)",
+    draft: "hsl(35, 100%, 55%)"
+  };
+
+  const statusColorArray = [
+    COLORS.tokenized,
+    COLORS.approved,
+    COLORS.pending,
+    COLORS.rejected,
+    COLORS.draft
   ];
 
   return (
@@ -246,71 +255,141 @@ const Analytics = () => {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-2 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10 transition-all">
-          <CardHeader>
-            <CardTitle className="text-2xl">Property Status Distribution</CardTitle>
+        <Card className="border-2 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10 transition-all overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5">
+            <CardTitle className="text-2xl gradient-text">Property Status Distribution</CardTitle>
             <CardDescription>Breakdown of property statuses</CardDescription>
           </CardHeader>
-          <CardContent className="h-80">
+          <CardContent className="h-80 pt-6">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={data.propertyStatusData}
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
-                  label={(entry) => `${entry.name}: ${entry.value}`}
-                  outerRadius={100}
-                  fill="#8884d8"
+                  innerRadius={70}
+                  outerRadius={110}
+                  paddingAngle={3}
                   dataKey="value"
                 >
                   {data.propertyStatusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={statusColorArray[index % statusColorArray.length]}
+                      className="hover:opacity-80 transition-opacity cursor-pointer"
+                    />
                   ))}
+                  <LabelList
+                    position="outside"
+                    formatter={(value: number, entry: any) => {
+                      const total = data.propertyStatusData.reduce((sum, item) => sum + item.value, 0);
+                      const percentage = ((value / total) * 100).toFixed(0);
+                      return `${percentage}%`;
+                    }}
+                    className="fill-foreground font-semibold text-sm"
+                  />
                 </Pie>
-                <Tooltip />
-                <Legend />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "2px solid hsl(var(--border))",
+                    borderRadius: "12px",
+                    padding: "12px",
+                    boxShadow: "0 10px 40px -10px hsl(var(--primary) / 0.2)"
+                  }}
+                  formatter={(value: any, name: string) => [
+                    `${value} ${value === 1 ? 'property' : 'properties'}`,
+                    name
+                  ]}
+                />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={36}
+                  iconType="circle"
+                  wrapperStyle={{
+                    paddingTop: "20px",
+                    fontSize: "14px",
+                    fontWeight: "500"
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card className="border-2 hover:border-secondary/30 hover:shadow-xl hover:shadow-secondary/10 transition-all">
-          <CardHeader>
-            <CardTitle className="text-2xl">Top Properties by Revenue</CardTitle>
+        <Card className="border-2 hover:border-secondary/30 hover:shadow-xl hover:shadow-secondary/10 transition-all overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-secondary/5 via-accent/5 to-secondary/5">
+            <CardTitle className="text-2xl gradient-text">Top Properties by Revenue</CardTitle>
             <CardDescription>Highest earning properties</CardDescription>
           </CardHeader>
-          <CardContent className="h-80">
+          <CardContent className="h-80 pt-6">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.revenueByProperty}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <BarChart 
+                data={data.revenueByProperty}
+                margin={{ top: 20, right: 10, left: 10, bottom: 50 }}
+              >
+                <defs>
+                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(250, 75%, 60%)" stopOpacity={0.9}/>
+                    <stop offset="95%" stopColor="hsl(280, 70%, 55%)" stopOpacity={0.7}/>
+                  </linearGradient>
+                  <filter id="shadow" height="200%">
+                    <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="hsl(250, 75%, 60%)" floodOpacity="0.3"/>
+                  </filter>
+                </defs>
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  stroke="hsl(var(--border))" 
+                  strokeOpacity={0.3}
+                  vertical={false}
+                />
                 <XAxis
                   dataKey="name"
                   stroke="hsl(var(--muted-foreground))"
-                  fontSize={12}
+                  fontSize={11}
                   tickLine={false}
+                  axisLine={false}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  interval={0}
                 />
                 <YAxis
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                   tickLine={false}
-                  tickFormatter={(value) => `$${value.toLocaleString()}`}
+                  axisLine={false}
+                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                 />
                 <Tooltip
+                  cursor={{ fill: "hsl(var(--primary) / 0.1)", radius: 8 }}
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
+                    border: "2px solid hsl(var(--border))",
                     borderRadius: "12px",
+                    padding: "12px",
+                    boxShadow: "0 10px 40px -10px hsl(var(--primary) / 0.3)"
+                  }}
+                  labelStyle={{
+                    color: "hsl(var(--foreground))",
+                    fontWeight: "600",
+                    marginBottom: "4px"
                   }}
                   formatter={(value: any) => [`$${value.toLocaleString()}`, "Revenue"]}
                 />
-                <defs>
-                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(250, 75%, 60%)" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="hsl(280, 70%, 55%)" stopOpacity={0.8}/>
-                  </linearGradient>
-                </defs>
-                <Bar dataKey="revenue" fill="url(#colorRevenue)" radius={[8, 8, 0, 0]} />
+                <Bar 
+                  dataKey="revenue" 
+                  fill="url(#colorRevenue)" 
+                  radius={[12, 12, 0, 0]}
+                  filter="url(#shadow)"
+                  maxBarSize={80}
+                >
+                  <LabelList
+                    position="top"
+                    formatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
+                    className="fill-foreground font-semibold text-xs"
+                  />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
