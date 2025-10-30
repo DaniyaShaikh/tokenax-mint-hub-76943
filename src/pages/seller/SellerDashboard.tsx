@@ -213,8 +213,18 @@ const SellerDashboard = () => {
       {/* Properties List */}
       <Card>
         <CardHeader>
-          <CardTitle>Your Properties</CardTitle>
-          <CardDescription>All your listed properties with current status</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Recent Properties</CardTitle>
+              <CardDescription>Your latest property listings</CardDescription>
+            </div>
+            {properties.length > 0 && (
+              <Button variant="outline" onClick={() => setShowListingDialog(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add New
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -229,10 +239,10 @@ const SellerDashboard = () => {
               </Button>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {properties.map((property) => (
-                <Card key={property.id} className="overflow-hidden">
-                  <div className="aspect-video bg-muted relative">
+            <div className="grid gap-4 md:grid-cols-2">
+              {properties.slice(0, 6).map((property) => (
+                <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-[4/3] bg-muted relative">
                     {property.property_images?.[0] ? (
                       <img
                         src={property.property_images[0]}
@@ -240,18 +250,20 @@ const SellerDashboard = () => {
                         className="object-cover w-full h-full"
                       />
                     ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <Building2 className="h-12 w-12 text-muted-foreground" />
+                      <div className="flex items-center justify-center h-full bg-gradient-to-br from-muted to-muted/50">
+                        <Building2 className="h-10 w-10 text-muted-foreground/40" />
                       </div>
                     )}
-                  </div>
-                  <CardContent className="pt-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold line-clamp-1">{property.title}</h3>
+                    <div className="absolute top-2 right-2">
                       {getStatusBadge(property.status)}
                     </div>
-                    <p className="text-sm text-muted-foreground mb-1">{property.property_type}</p>
-                    <p className="text-sm font-medium mb-3">${Number(property.valuation).toLocaleString()}</p>
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold line-clamp-1 mb-2">{property.title}</h3>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
+                      <span className="capitalize">{property.property_type}</span>
+                      <span className="font-semibold text-foreground">${Number(property.valuation).toLocaleString()}</span>
+                    </div>
                     <Button
                       variant="outline"
                       size="sm"
