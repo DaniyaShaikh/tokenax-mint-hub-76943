@@ -77,6 +77,13 @@ const KYCReview = () => {
   const [rejectionReason, setRejectionReason] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [editedData, setEditedData] = useState<any>(null);
+  const [uploadingDocs, setUploadingDocs] = useState(false);
+  const [docFiles, setDocFiles] = useState<{
+    idDocument?: File;
+    proofOfAddress?: File;
+    selfie?: File;
+    companyDocuments?: File;
+  }>({});
 
   useEffect(() => {
     loadVerifications();
@@ -134,6 +141,87 @@ const KYCReview = () => {
       loadVerifications();
     } catch (error: any) {
       toast.error(error.message);
+    }
+  };
+
+  const handleFileUpload = async (fileType: string, file: File) => {
+    if (!selectedKYC) return null;
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${selectedKYC.user_id}/${fileType}_${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError, data } = await supabase.storage
+        .from('kyc-documents')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      return data.path;
+    } catch (error: any) {
+      toast.error(`Failed to upload ${fileType}: ${error.message}`);
+      return null;
+    }
+  };
+
+  const handleUploadAndApprove = async () => {
+    if (!selectedKYC || !editedData) return;
+
+    setUploadingDocs(true);
+    try {
+      // Upload any new documents
+      const uploadedPaths: any = {};
+      
+      if (docFiles.idDocument) {
+        uploadedPaths.idDocument = await handleFileUpload('id_document', docFiles.idDocument);
+      }
+      if (docFiles.proofOfAddress) {
+        uploadedPaths.proofOfAddress = await handleFileUpload('proof_of_address', docFiles.proofOfAddress);
+      }
+      if (docFiles.selfie) {
+        uploadedPaths.selfie = await handleFileUpload('selfie', docFiles.selfie);
+      }
+      if (docFiles.companyDocuments && selectedKYC.verification_type === 'kyb') {
+        uploadedPaths.companyDocuments = await handleFileUpload('company_documents', docFiles.companyDocuments);
+      }
+
+      // Update verification data with new document paths
+      const updatedData = {
+        ...editedData,
+        documents: {
+          ...editedData.documents,
+          ...uploadedPaths
+        }
+      };
+
+      const { error } = await supabase
+        .from("kyc_verifications")
+        .update({
+          status: "approved",
+          review_status: "approved",
+          verification_data: updatedData,
+          admin_notes: adminNotes || null,
+          rejection_reason: null,
+          verified_at: new Date().toISOString(),
+        })
+        .eq("id", selectedKYC.id);
+
+      if (error) throw error;
+
+      toast.success("Documents uploaded and verification approved!");
+      setSelectedKYC(null);
+      setAdminNotes("");
+      setEditMode(false);
+      setEditedData(null);
+      setDocFiles({});
+      loadVerifications();
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setUploadingDocs(false);
     }
   };
 
@@ -469,6 +557,7 @@ const KYCReview = () => {
               <CardTitle className="text-lg flex items-center gap-2">
                 <FileText className="h-5 w-5 text-success" />
                 Uploaded Documents
+                {editMode && <span className="text-sm text-muted-foreground ml-2">(Upload missing docs below)</span>}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -477,42 +566,8 @@ const KYCReview = () => {
                   <FileText className="h-4 w-4" />
                   <span className="text-sm font-medium">ID Document</span>
                 </div>
-                {data.documents.idDocument ? (
-                  <Badge variant="default">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Uploaded
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary">
-                    <XCircle className="h-3 w-3 mr-1" />
-                    Missing
-                  </Badge>
-                )}
-              </div>
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                 <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  <span className="text-sm font-medium">Proof of Address</span>
-                </div>
-                {data.documents.proofOfAddress ? (
-                  <Badge variant="default">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Uploaded
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary">
-                    <XCircle className="h-3 w-3 mr-1" />
-                    Missing
-                  </Badge>
-                )}
-              </div>
-              {!isKYB && (
-                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    <span className="text-sm font-medium">Selfie Verification</span>
-                  </div>
-                  {data.documents.selfie ? (
+                  {data.documents.idDocument ? (
                     <Badge variant="default">
                       <CheckCircle className="h-3 w-3 mr-1" />
                       Uploaded
@@ -523,6 +578,111 @@ const KYCReview = () => {
                       Missing
                     </Badge>
                   )}
+                  {editMode && !data.documents.idDocument && (
+                    <Input
+                      type="file"
+                      accept=".jpg,.jpeg,.png,.pdf"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setDocFiles({ ...docFiles, idDocument: file });
+                      }}
+                      className="w-48 text-xs"
+                    />
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  <span className="text-sm font-medium">Proof of Address</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {data.documents.proofOfAddress ? (
+                    <Badge variant="default">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Uploaded
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary">
+                      <XCircle className="h-3 w-3 mr-1" />
+                      Missing
+                    </Badge>
+                  )}
+                  {editMode && !data.documents.proofOfAddress && (
+                    <Input
+                      type="file"
+                      accept=".jpg,.jpeg,.png,.pdf"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setDocFiles({ ...docFiles, proofOfAddress: file });
+                      }}
+                      className="w-48 text-xs"
+                    />
+                  )}
+                </div>
+              </div>
+              {!isKYB && (
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    <span className="text-sm font-medium">Selfie Verification</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {data.documents.selfie ? (
+                      <Badge variant="default">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Uploaded
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary">
+                        <XCircle className="h-3 w-3 mr-1" />
+                        Missing
+                      </Badge>
+                    )}
+                    {editMode && !data.documents.selfie && (
+                      <Input
+                        type="file"
+                        accept=".jpg,.jpeg,.png"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) setDocFiles({ ...docFiles, selfie: file });
+                        }}
+                        className="w-48 text-xs"
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+              {isKYB && (
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    <span className="text-sm font-medium">Company Documents</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {data.documents.companyDocuments ? (
+                      <Badge variant="default">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Uploaded
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary">
+                        <XCircle className="h-3 w-3 mr-1" />
+                        Missing
+                      </Badge>
+                    )}
+                    {editMode && !data.documents.companyDocuments && (
+                      <Input
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.pdf"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) setDocFiles({ ...docFiles, companyDocuments: file });
+                        }}
+                        className="w-48 text-xs"
+                      />
+                    )}
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -593,17 +753,42 @@ const KYCReview = () => {
             {editMode ? (
               <div className="space-y-3">
                 <div className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                  <p className="text-sm text-amber-900 dark:text-amber-100">
-                    <strong>Admin Override:</strong> You're editing user data on their behalf. After making corrections, click "Resubmit for Verification" to send it back for review.
+                  <p className="text-sm text-amber-900 dark:text-amber-100 mb-2">
+                    <strong>Admin Override:</strong> You're editing user data and can upload missing documents.
                   </p>
+                  <ul className="text-xs text-amber-800 dark:text-amber-200 space-y-1 ml-4 list-disc">
+                    <li>Upload missing documents above</li>
+                    <li>Click "Upload & Approve" to approve immediately with uploaded docs</li>
+                    <li>Or click "Request Revision" to ask user to resubmit</li>
+                  </ul>
                 </div>
-                <Button
-                  onClick={handleResubmit}
-                  className="w-full bg-gradient-to-r from-primary via-secondary to-accent text-white hover:shadow-lg rounded-full"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Resubmit for Verification
-                </Button>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    onClick={handleUploadAndApprove}
+                    disabled={uploadingDocs}
+                    className="bg-gradient-to-r from-success to-success/80 text-white hover:shadow-lg rounded-full"
+                  >
+                    {uploadingDocs ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Upload & Approve
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={handleResubmit}
+                    variant="outline"
+                    className="rounded-full"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Request Revision
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-3">
@@ -730,6 +915,9 @@ const KYCReview = () => {
                           setSelectedKYC(kyc);
                           setAdminNotes(kyc.admin_notes || "");
                           setRejectionReason(kyc.rejection_reason || "");
+                          setEditMode(false);
+                          setEditedData(null);
+                          setDocFiles({});
                         }}
                       >
                         <Eye className="h-4 w-4 mr-2" />
