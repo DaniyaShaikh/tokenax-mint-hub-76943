@@ -13,9 +13,15 @@ import {
   ArrowDownRight 
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import AddMoneyDialog from "@/components/dashboard/AddMoneyDialog";
+import SendMoneyDialog from "@/components/dashboard/SendMoneyDialog";
+import ConvertFundsDialog from "@/components/dashboard/ConvertFundsDialog";
 
 const BuyerDashboard = () => {
   const [userName, setUserName] = useState("");
+  const [addMoneyOpen, setAddMoneyOpen] = useState(false);
+  const [sendMoneyOpen, setSendMoneyOpen] = useState(false);
+  const [convertFundsOpen, setConvertFundsOpen] = useState(false);
 
   useEffect(() => {
     fetchUserName();
@@ -40,22 +46,23 @@ const BuyerDashboard = () => {
     }
   };
 
-  // Placeholder data for the performance graph
+  // Sample data for the performance graph
   const performanceData = [
-    { month: "May", value: 4200 },
-    { month: "Jun", value: 5100 },
-    { month: "Jul", value: 4800 },
-    { month: "Aug", value: 6200 },
-    { month: "Sep", value: 5800 },
-    { month: "Oct", value: 7100 },
+    { month: "May", value: 42500 },
+    { month: "Jun", value: 51200 },
+    { month: "Jul", value: 48900 },
+    { month: "Aug", value: 62300 },
+    { month: "Sep", value: 58700 },
+    { month: "Oct", value: 71400 },
   ];
 
-  // Placeholder transaction data
+  // Sample transaction data
   const recentTransactions = [
-    { id: 1, name: "Token Purchase - Property XYZ", type: "Investment", amount: -5000, date: "2 hours ago" },
-    { id: 2, name: "Dividend Payment", type: "Income", amount: 250, date: "1 day ago" },
-    { id: 3, name: "Token Sale - Asset ABC", type: "Withdrawal", amount: 3200, date: "2 days ago" },
-    { id: 4, name: "Token Purchase - Digital Art", type: "Investment", amount: -1500, date: "3 days ago" },
+    { id: 1, name: "Token Purchase - Luxury Condo Downtown", type: "Investment", amount: -15000, date: "2 hours ago" },
+    { id: 2, name: "Rental Income Distribution", type: "Income", amount: 847, date: "1 day ago" },
+    { id: 3, name: "Token Sale - Commercial Property", type: "Withdrawal", amount: 23200, date: "3 days ago" },
+    { id: 4, name: "Token Purchase - Suburban Home", type: "Investment", amount: -8500, date: "5 days ago" },
+    { id: 5, name: "Property Appreciation Payout", type: "Income", amount: 1240, date: "1 week ago" },
   ];
 
   return (
@@ -67,15 +74,15 @@ const BuyerDashboard = () => {
 
       {/* Wallet Action Buttons */}
       <div className="flex flex-wrap gap-3">
-        <Button size="lg" className="gap-2 bg-foreground text-background hover:bg-foreground/90">
+        <Button size="lg" className="gap-2 bg-foreground text-background hover:bg-foreground/90" onClick={() => setAddMoneyOpen(true)}>
           <PlusCircle className="h-5 w-5" />
           Add money
         </Button>
-        <Button size="lg" variant="outline" className="gap-2">
+        <Button size="lg" variant="outline" className="gap-2" onClick={() => setSendMoneyOpen(true)}>
           <Send className="h-5 w-5" />
           Send money
         </Button>
-        <Button size="lg" variant="outline" className="gap-2">
+        <Button size="lg" variant="outline" className="gap-2" onClick={() => setConvertFundsOpen(true)}>
           <RefreshCcw className="h-5 w-5" />
           Convert funds
         </Button>
@@ -90,7 +97,7 @@ const BuyerDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold mb-2">$0.00</div>
+            <div className="text-4xl font-bold mb-2">$12,547.89</div>
             <Badge variant="secondary" className="bg-primary/10 text-primary">
               2% Interest
             </Badge>
@@ -104,7 +111,7 @@ const BuyerDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold mb-2">$0.00</div>
+            <div className="text-4xl font-bold mb-2">$8,234.50</div>
             <Badge variant="secondary" className="bg-primary/10 text-primary">
               2% Interest
             </Badge>
@@ -120,8 +127,8 @@ const BuyerDashboard = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$0.00</div>
-            <p className="text-xs text-muted-foreground mt-1">+0% from last month</p>
+            <div className="text-2xl font-bold">$71,400</div>
+            <p className="text-xs text-muted-foreground mt-1">+14.8% from last month</p>
           </CardContent>
         </Card>
 
@@ -131,7 +138,7 @@ const BuyerDashboard = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">8</div>
             <p className="text-xs text-muted-foreground mt-1">Across all assets</p>
           </CardContent>
         </Card>
@@ -142,7 +149,7 @@ const BuyerDashboard = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$0.00</div>
+            <div className="text-2xl font-bold">$83,920</div>
             <p className="text-xs text-muted-foreground mt-1">Current valuation</p>
           </CardContent>
         </Card>
@@ -153,7 +160,7 @@ const BuyerDashboard = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0%</div>
+            <div className="text-2xl font-bold">17.6%</div>
             <p className="text-xs text-muted-foreground mt-1">Return on investment</p>
           </CardContent>
         </Card>
@@ -239,6 +246,11 @@ const BuyerDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Dialogs */}
+      <AddMoneyDialog open={addMoneyOpen} onOpenChange={setAddMoneyOpen} />
+      <SendMoneyDialog open={sendMoneyOpen} onOpenChange={setSendMoneyOpen} />
+      <ConvertFundsDialog open={convertFundsOpen} onOpenChange={setConvertFundsOpen} />
     </div>
   );
 };
