@@ -15,6 +15,9 @@ interface Property {
   address: string;
   valuation: number;
   status: string;
+  property_type: string;
+  description?: string;
+  highlights?: string;
   property_tokens?: Array<{
     id: string;
     total_tokens: number;
@@ -234,7 +237,7 @@ const TokenManagement = () => {
       {/* Active Tokenized Properties */}
       <div className="space-y-4">
         <h2 className="text-3xl font-bold gradient-text">Active Tokenized Properties</h2>
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tokenizedProperties.map((property) => {
             const tokens = property.property_tokens[0];
             if (!tokens) return null;
@@ -243,60 +246,162 @@ const TokenManagement = () => {
             const soldPercentage = (soldTokens / tokens.total_tokens) * 100;
 
             return (
-              <Card key={property.id} className="border-2 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10 transition-all">
+              <Card key={property.id} className="border-2 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10 transition-all hover:-translate-y-1">
                 <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle>{property.title}</CardTitle>
-                      <CardDescription>{property.address}</CardDescription>
-                    </div>
-                    <div className="px-4 py-2 rounded-full bg-gradient-to-r from-success to-success/80 text-white font-semibold text-sm shadow-lg">
+                  <div className="flex items-start justify-between mb-2">
+                    <Badge className="bg-gradient-to-r from-success to-success/80 text-success-foreground border-0">
                       Live
-                    </div>
+                    </Badge>
                   </div>
+                  <CardTitle className="text-xl">{property.title}</CardTitle>
+                  <CardDescription>{property.address}</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="p-4 bg-card rounded-lg">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                        <Coins className="h-4 w-4" />
-                        <span>Total Tokens</span>
-                      </div>
-                      <p className="text-2xl font-bold text-primary">
-                        {tokens.total_tokens.toLocaleString()}
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 bg-accent/10 rounded-lg">
+                      <p className="text-xs text-muted-foreground mb-1">Valuation</p>
+                      <p className="text-lg font-bold text-accent">
+                        ${Number(property.valuation).toLocaleString()}
                       </p>
                     </div>
-                    <div className="p-4 bg-card rounded-lg">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                        <DollarSign className="h-4 w-4" />
-                        <span>Price Per Token</span>
-                      </div>
-                      <p className="text-2xl font-bold text-accent">
-                        ${Number(tokens.price_per_token).toFixed(2)}
-                      </p>
-                    </div>
-                    <div className="p-4 bg-card rounded-lg">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                        <TrendingUp className="h-4 w-4" />
-                        <span>Tokens Sold</span>
-                      </div>
-                      <p className="text-2xl font-bold text-success">
-                        {soldTokens.toLocaleString()}
-                        <span className="text-sm text-muted-foreground ml-2">
-                          ({soldPercentage.toFixed(1)}%)
-                        </span>
-                      </p>
-                    </div>
-                    <div className="p-4 bg-card rounded-lg">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                        <Coins className="h-4 w-4" />
-                        <span>Available</span>
-                      </div>
-                      <p className="text-2xl font-bold text-primary">
-                        {tokens.available_tokens.toLocaleString()}
+                    <div className="p-3 bg-success/10 rounded-lg">
+                      <p className="text-xs text-muted-foreground mb-1">Sold</p>
+                      <p className="text-lg font-bold text-success">
+                        {soldPercentage.toFixed(1)}%
                       </p>
                     </div>
                   </div>
+
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="w-full bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/25 rounded-full">
+                        <TrendingUp className="h-4 w-4 mr-2" />
+                        View Token Analysis
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl">{property.title}</DialogTitle>
+                        <p className="text-muted-foreground">{property.address}</p>
+                      </DialogHeader>
+                      
+                      <div className="space-y-6 py-4">
+                        {/* Property Overview */}
+                        <div className="space-y-3">
+                          <h3 className="text-lg font-semibold">Property Overview</h3>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 bg-card rounded-lg border">
+                              <p className="text-sm text-muted-foreground mb-1">Property Type</p>
+                              <p className="text-lg font-semibold capitalize">{property.property_type}</p>
+                            </div>
+                            <div className="p-4 bg-card rounded-lg border">
+                              <p className="text-sm text-muted-foreground mb-1">Total Valuation</p>
+                              <p className="text-lg font-semibold text-accent">
+                                ${Number(property.valuation).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Token Metrics */}
+                        <div className="space-y-3">
+                          <h3 className="text-lg font-semibold">Token Metrics</h3>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                                <Coins className="h-4 w-4 text-primary" />
+                                <span>Total Tokens</span>
+                              </div>
+                              <p className="text-2xl font-bold text-primary">
+                                {tokens.total_tokens.toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="p-4 bg-accent/10 rounded-lg border border-accent/20">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                                <DollarSign className="h-4 w-4 text-accent" />
+                                <span>Price/Token</span>
+                              </div>
+                              <p className="text-2xl font-bold text-accent">
+                                ${Number(tokens.price_per_token).toFixed(2)}
+                              </p>
+                            </div>
+                            <div className="p-4 bg-success/10 rounded-lg border border-success/20">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                                <TrendingUp className="h-4 w-4 text-success" />
+                                <span>Tokens Sold</span>
+                              </div>
+                              <p className="text-2xl font-bold text-success">
+                                {soldTokens.toLocaleString()}
+                              </p>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {soldPercentage.toFixed(1)}% sold
+                              </p>
+                            </div>
+                            <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                                <Coins className="h-4 w-4 text-primary" />
+                                <span>Available</span>
+                              </div>
+                              <p className="text-2xl font-bold text-primary">
+                                {tokens.available_tokens.toLocaleString()}
+                              </p>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {((tokens.available_tokens / tokens.total_tokens) * 100).toFixed(1)}% remaining
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Financial Analysis */}
+                        <div className="space-y-3">
+                          <h3 className="text-lg font-semibold">Financial Analysis</h3>
+                          <div className="grid grid-cols-3 gap-4">
+                            <div className="p-4 bg-card rounded-lg border">
+                              <p className="text-sm text-muted-foreground mb-1">Total Token Value</p>
+                              <p className="text-xl font-bold">
+                                ${(tokens.total_tokens * Number(tokens.price_per_token)).toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="p-4 bg-card rounded-lg border">
+                              <p className="text-sm text-muted-foreground mb-1">Revenue Generated</p>
+                              <p className="text-xl font-bold text-success">
+                                ${(soldTokens * Number(tokens.price_per_token)).toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="p-4 bg-card rounded-lg border">
+                              <p className="text-sm text-muted-foreground mb-1">Potential Revenue</p>
+                              <p className="text-xl font-bold text-muted-foreground">
+                                ${(tokens.available_tokens * Number(tokens.price_per_token)).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Property Details */}
+                        {property.description && (
+                          <div className="space-y-3">
+                            <h3 className="text-lg font-semibold">Description</h3>
+                            <p className="text-muted-foreground">{property.description}</p>
+                          </div>
+                        )}
+
+                        {property.highlights && (
+                          <div className="space-y-3">
+                            <h3 className="text-lg font-semibold">Highlights</h3>
+                            <div className="flex flex-wrap gap-2">
+                              {property.highlights.split('•').map((highlight, idx) => (
+                                highlight.trim() && (
+                                  <Badge key={idx} variant="outline" className="text-sm">
+                                    {highlight.trim()}
+                                  </Badge>
+                                )
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
             );
