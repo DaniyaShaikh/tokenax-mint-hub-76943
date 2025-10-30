@@ -3,8 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, TrendingUp, Plus, Coins, DollarSign, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Building2, TrendingUp, Plus, Coins, DollarSign, Clock, CheckCircle, XCircle, Eye } from "lucide-react";
 import { PropertyListingDialog } from "./PropertyListingDialog";
+import { PropertyDetailsDialog } from "./PropertyDetailsDialog";
 import KYCVerification from "./KYCVerification";
 
 interface Property {
@@ -23,6 +24,7 @@ interface Property {
 const SellerDashboard = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [listingDialogOpen, setListingDialogOpen] = useState(false);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [kycStatus, setKycStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -259,6 +261,14 @@ const SellerDashboard = () => {
                             <div className="h-full bg-gradient-to-r from-primary to-accent transition-all" style={{ width: `${percentageSold}%` }} />
                           </div>
                         </div>
+                        <Button 
+                          variant="outline" 
+                          className="w-full mt-2"
+                          onClick={() => setSelectedPropertyId(property.id)}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -270,6 +280,11 @@ const SellerDashboard = () => {
       </Card>
 
       <PropertyListingDialog open={listingDialogOpen} onOpenChange={setListingDialogOpen} onSuccess={loadData} />
+      <PropertyDetailsDialog 
+        propertyId={selectedPropertyId || ""} 
+        open={!!selectedPropertyId} 
+        onOpenChange={(open) => !open && setSelectedPropertyId(null)} 
+      />
     </div>
   );
 };
