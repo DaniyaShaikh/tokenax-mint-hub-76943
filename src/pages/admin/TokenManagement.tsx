@@ -209,7 +209,7 @@ const TokenManagement = () => {
                     <DialogFooter>
                       <Button
                         onClick={() => handleCreateTokens(property.id)}
-                        className="w-full bg-gradient-to-r from-success to-success/80 hover:shadow-lg hover:shadow-success/25 rounded-full"
+                        className="w-full bg-gradient-to-r from-success to-success/80 text-success-foreground hover:shadow-lg hover:shadow-success/25 rounded-full"
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
                         Publish & Tokenize
