@@ -79,7 +79,7 @@ const SellerDashboard = () => {
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { variant: "default" | "secondary" | "destructive"; icon: any }> = {
       draft: { variant: "secondary", icon: Clock },
-      pending_review: { variant: "default", icon: Clock },
+      pending: { variant: "default", icon: Clock },
       approved: { variant: "default", icon: CheckCircle },
       rejected: { variant: "destructive", icon: XCircle },
       tokenized: { variant: "default", icon: CheckCircle },
@@ -108,7 +108,7 @@ const SellerDashboard = () => {
 
   const totalProperties = properties.length;
   const tokenizedProperties = properties.filter(p => p.status === "tokenized").length;
-  const pendingReview = properties.filter(p => p.status === "pending_review" || p.status === "draft").length;
+  const pendingReview = properties.filter(p => p.status === "pending" || p.status === "draft").length;
 
   const totalTokensSold = properties.reduce((sum, p) => {
     if (p.property_tokens && p.property_tokens[0]) {

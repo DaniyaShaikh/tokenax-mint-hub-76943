@@ -32,8 +32,8 @@ export const InvestDialog = ({ property, open, onOpenChange, onSuccess }: Invest
   const maxTokens = tokenData.available_tokens;
 
   const handleInvest = async () => {
-    if (tokens < 1 || tokens > maxTokens) {
-      toast.error("Invalid token amount");
+    if (tokens <= 0 || tokens > tokenData.available_tokens) {
+      toast.error("Invalid number of tokens");
       return;
     }
 
@@ -45,35 +45,41 @@ export const InvestDialog = ({ property, open, onOpenChange, onSuccess }: Invest
         return;
       }
 
-      // Insert purchase
-      const { error: purchaseError } = await supabase
-        .from("token_purchases")
-        .insert({
-          buyer_id: user.data.user.id,
-          property_id: property.id,
-          tokens_purchased: tokens,
-          price_per_token: tokenData.price_per_token,
-          total_amount: totalCost,
-        });
+      const totalAmount = tokens * tokenData.price_per_token;
+
+      // In a real-world scenario, this would:
+      // 1. Integrate with Stripe or another payment gateway
+      // 2. Process the payment
+      // 3. Only record the purchase after successful payment
+      // For now, we'll simulate the purchase directly
+
+      const { error: purchaseError } = await supabase.from("token_purchases").insert({
+        buyer_id: user.data.user.id,
+        property_id: property.id,
+        tokens_purchased: tokens,
+        total_amount: totalAmount,
+        price_per_token: tokenData.price_per_token,
+      });
 
       if (purchaseError) throw purchaseError;
 
       // Update available tokens
+      const newAvailableTokens = tokenData.available_tokens - tokens;
       const { error: updateError } = await supabase
         .from("property_tokens")
-        .update({
-          available_tokens: maxTokens - tokens,
-        })
+        .update({ available_tokens: newAvailableTokens })
         .eq("property_id", property.id);
 
       if (updateError) throw updateError;
 
-      toast.success(`Successfully invested ${tokens} tokens!`);
+      toast.success(
+        `Successfully purchased ${tokens} tokens! In production, payment of $${totalAmount.toLocaleString()} would be processed via Stripe.`,
+        { duration: 5000 }
+      );
       onOpenChange(false);
       onSuccess();
-      setTokens(1);
     } catch (error: any) {
-      toast.error(error.message || "Failed to complete investment");
+      toast.error(error.message || "Failed to process investment");
     } finally {
       setLoading(false);
     }
