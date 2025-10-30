@@ -8,8 +8,10 @@ import {
   TrendingUp,
   Menu,
   X,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -17,6 +19,8 @@ import { toast } from "sonner";
 const BuyerLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [userMode, setUserMode] = useState<"buyer" | "seller">("buyer");
+  const [userId, setUserId] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -33,11 +37,51 @@ const BuyerLayout = () => {
         navigate("/auth");
         return;
       }
+
+      setUserId(session.user.id);
+      
+      // Load user mode from profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("user_mode")
+        .eq("id", session.user.id)
+        .single();
+      
+      if (profile) {
+        setUserMode(profile.user_mode as "buyer" | "seller");
+      }
     } catch (error) {
       toast.error("Failed to verify access");
       navigate("/auth");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleModeSwitch = async () => {
+    if (!userId) return;
+
+    const newMode = userMode === "buyer" ? "seller" : "buyer";
+    
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ user_mode: newMode })
+        .eq("id", userId);
+
+      if (error) throw error;
+
+      setUserMode(newMode);
+      toast.success(`Switched to ${newMode} mode`);
+      
+      // Navigate to the appropriate portal
+      if (newMode === "seller") {
+        navigate("/seller");
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      toast.error("Failed to switch mode");
     }
   };
 
@@ -133,13 +177,23 @@ const BuyerLayout = () => {
             })}
           </nav>
 
-          {/* Footer */}
+          {/* Footer with Mode Toggle */}
           {sidebarOpen && (
-            <div className="p-4 border-t border-border/50">
+            <div className="p-4 border-t border-border/50 space-y-3">
               <div className="p-4 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-xl">
                 <p className="text-xs font-semibold text-primary mb-1">Buyer Account</p>
                 <p className="text-xs text-muted-foreground">Asset tokenization platform</p>
               </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full gap-2"
+                onClick={handleModeSwitch}
+              >
+                <RefreshCw className="h-4 w-4" />
+                Switch to Seller Mode
+              </Button>
             </div>
           )}
         </div>
