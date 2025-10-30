@@ -894,90 +894,140 @@ const KYCReview = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={activeTab} className="space-y-4 mt-6">
-          {verifications.map((kyc) => {
-            const isKYB = kyc.verification_type === "kyb";
+        <TabsContent value={activeTab} className="mt-6">
+          <div className="rounded-lg border border-border bg-card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-muted/50 border-b border-border">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold">Applicant</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold">Type</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold">Submitted</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold">Status</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {verifications.map((kyc) => {
+                    const isKYB = kyc.verification_type === "kyb";
+                    const displayName = isKYB 
+                      ? kyc.company_name 
+                      : `${kyc.verification_data?.personalInfo?.firstName || ''} ${kyc.verification_data?.personalInfo?.lastName || ''}`.trim() || kyc.profiles.full_name;
 
-            return (
-              <Card
-                key={kyc.id}
-                className="transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 border-2 hover:border-primary/30"
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          {isKYB ? (
-                            <Building className="h-4 w-4 text-accent" />
-                          ) : (
-                            <User className="h-4 w-4 text-accent" />
-                          )}
-                          <CardTitle className="text-xl">{kyc.profiles.email}</CardTitle>
-                        </div>
-                        <CardDescription className="flex flex-col gap-1">
-                          <span>{kyc.profiles.full_name || "No name provided"}</span>
-                          {kyc.company_name && (
-                            <span className="font-medium text-primary">
-                              Company: {kyc.company_name}
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1 text-xs">
-                            <Calendar className="h-3 w-3" />
-                            Submitted {new Date(kyc.created_at).toLocaleDateString()}
-                          </span>
-                        </CardDescription>
-                      </div>
-                    </div>
-                    <Badge className="bg-gradient-to-r from-primary to-secondary text-white border-0">
-                      {kyc.verification_type.toUpperCase()}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button 
-                        className="w-full bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/25 rounded-full"
-                        onClick={() => {
-                          setSelectedKYC(kyc);
-                          setAdminNotes(kyc.admin_notes || "");
-                          setRejectionReason(kyc.rejection_reason || "");
-                          setEditMode(false);
-                          setEditedData(null);
-                          setDocFiles({});
-                        }}
+                    return (
+                      <tr 
+                        key={kyc.id}
+                        className="hover:bg-muted/30 transition-colors"
                       >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Review Details
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle className="text-2xl flex items-center gap-2">
-                          <Shield className="h-6 w-6 text-primary" />
-                          {isKYB ? "KYB" : "KYC"} Verification Review
-                        </DialogTitle>
-                        <p className="text-muted-foreground">{kyc.profiles.email}</p>
-                      </DialogHeader>
-                      {selectedKYC && renderVerificationDetails(selectedKYC)}
-                    </DialogContent>
-                  </Dialog>
-                </CardContent>
-              </Card>
-            );
-          })}
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-semibold">
+                              {isKYB ? (
+                                <Building className="h-5 w-5" />
+                              ) : (
+                                <User className="h-5 w-5" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-medium text-foreground">{displayName || "N/A"}</p>
+                              <p className="text-sm text-muted-foreground">{kyc.profiles.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <Badge className="bg-gradient-to-r from-primary to-secondary text-white border-0">
+                            {kyc.verification_type.toUpperCase()}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Calendar className="h-4 w-4" />
+                            {new Date(kyc.created_at).toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric', 
+                              year: 'numeric' 
+                            })}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {activeTab === 'pending' && (
+                            <Badge variant="outline" className="border-amber-500 text-amber-600 dark:text-amber-400">
+                              <Clock className="h-3 w-3 mr-1" />
+                              Pending Review
+                            </Badge>
+                          )}
+                          {activeTab === 'approved' && (
+                            <Badge variant="outline" className="border-success text-success">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Approved
+                            </Badge>
+                          )}
+                          {activeTab === 'rejected' && (
+                            <Badge variant="outline" className="border-destructive text-destructive">
+                              <XCircle className="h-3 w-3 mr-1" />
+                              Rejected
+                            </Badge>
+                          )}
+                          {activeTab === 'needs_revision' && (
+                            <Badge variant="outline" className="border-orange-500 text-orange-600 dark:text-orange-400">
+                              <AlertCircle className="h-3 w-3 mr-1" />
+                              Needs Revision
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                size="sm"
+                                className="bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/25 rounded-full"
+                                onClick={() => {
+                                  setSelectedKYC(kyc);
+                                  setAdminNotes(kyc.admin_notes || "");
+                                  setRejectionReason(kyc.rejection_reason || "");
+                                  setEditMode(false);
+                                  setEditedData(null);
+                                  setDocFiles({});
+                                }}
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                Review
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle className="text-2xl flex items-center gap-2">
+                                  <Shield className="h-6 w-6 text-primary" />
+                                  {isKYB ? "KYB" : "KYC"} Verification Review
+                                </DialogTitle>
+                                <p className="text-muted-foreground">{displayName} • {kyc.profiles.email}</p>
+                              </DialogHeader>
+                              {selectedKYC && renderVerificationDetails(selectedKYC)}
+                            </DialogContent>
+                          </Dialog>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
           {verifications.length === 0 && (
-            <Card>
-              <CardContent className="py-16 text-center">
-                <CheckCircle className="h-12 w-12 text-success mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-primary mb-2">All Clear!</h3>
-                <p className="text-muted-foreground">
-                  No {activeTab} verifications at the moment.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="rounded-lg border border-border bg-card p-16 text-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center">
+                  <CheckCircle className="h-8 w-8 text-success" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">All Clear!</h3>
+                  <p className="text-muted-foreground">
+                    No {activeTab} verifications at the moment.
+                  </p>
+                </div>
+              </div>
+            </div>
           )}
         </TabsContent>
       </Tabs>
