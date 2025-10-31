@@ -17,39 +17,42 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        // Check if user is admin
-        const { data: roles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id);
-        
-        const isAdmin = roles?.some((r) => r.role === "admin");
-        
-        if (isAdmin) {
-          navigate("/admin");
-        } else {
-          navigate("/dashboard");
-        }
+        // Use setTimeout to defer the async operations
+        setTimeout(async () => {
+          const { data: roles } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", session.user.id);
+          
+          const isAdmin = roles?.some((r) => r.role === "admin");
+          
+          if (isAdmin) {
+            navigate("/admin");
+          } else {
+            navigate("/dashboard");
+          }
+        }, 0);
       }
     });
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        // Check if user is admin
-        const { data: roles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id);
-        
-        const isAdmin = roles?.some((r) => r.role === "admin");
-        
-        if (isAdmin) {
-          navigate("/admin");
-        } else {
-          navigate("/dashboard");
-        }
+        setTimeout(async () => {
+          const { data: roles } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", session.user.id);
+          
+          const isAdmin = roles?.some((r) => r.role === "admin");
+          
+          if (isAdmin) {
+            navigate("/admin");
+          } else {
+            navigate("/dashboard");
+          }
+        }, 0);
       }
     });
 
@@ -82,6 +85,7 @@ const Auth = () => {
       }
     } catch (error: any) {
       toast.error(error.message);
+    } finally {
       setLoading(false);
     }
   };
