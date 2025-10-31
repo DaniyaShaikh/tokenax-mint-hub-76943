@@ -50,7 +50,6 @@ export const InvestDialog = ({ property, open, onOpenChange, onSuccess }: Invest
   const totalCost = tokens * pricePerToken;
   const maxTokens = tokenData.available_tokens;
   const hasSufficientBalance = walletBalance >= totalCost;
-  const ownershipPercentage = (tokens / (tokenData.available_tokens + tokens)) * 100;
 
   const handleTokenChange = (value: string) => {
     const newTokens = parseInt(value) || 1;
@@ -210,20 +209,6 @@ export const InvestDialog = ({ property, open, onOpenChange, onSuccess }: Invest
               </span>
             </div>
           </div>
-
-          {/* Ownership Indicator */}
-          <Card className="p-4 bg-muted/30">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground flex items-center gap-2">
-                  <Coins className="h-4 w-4" />
-                  Your Ownership
-                </span>
-                <span className="font-semibold text-lg">{ownershipPercentage.toFixed(3)}%</span>
-              </div>
-              <Progress value={ownershipPercentage} className="h-2" />
-            </div>
-          </Card>
 
           {/* Cost Breakdown */}
           <Card className="p-4 space-y-3 border-2">
