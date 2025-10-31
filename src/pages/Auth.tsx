@@ -17,46 +17,42 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let mounted = true;
+
+    const checkAndRedirect = async (session: any) => {
+      if (!session || !mounted) return;
+      
+      try {
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id);
+        
+        if (!mounted) return;
+        
+        const isAdmin = roles?.some((r) => r.role === "admin");
+        navigate(isAdmin ? "/admin" : "/dashboard", { replace: true });
+      } catch (error) {
+        console.error("Error checking roles:", error);
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        // Use setTimeout to defer the async operations
-        setTimeout(async () => {
-          const { data: roles } = await supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", session.user.id);
-          
-          const isAdmin = roles?.some((r) => r.role === "admin");
-          
-          if (isAdmin) {
-            navigate("/admin");
-          } else {
-            navigate("/dashboard");
-          }
-        }, 0);
+      if (event === 'SIGNED_IN' && session) {
+        checkAndRedirect(session);
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        setTimeout(async () => {
-          const { data: roles } = await supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", session.user.id);
-          
-          const isAdmin = roles?.some((r) => r.role === "admin");
-          
-          if (isAdmin) {
-            navigate("/admin");
-          } else {
-            navigate("/dashboard");
-          }
-        }, 0);
+        checkAndRedirect(session);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -70,7 +66,7 @@ const Auth = () => {
           password,
         });
         if (error) throw error;
-        toast.success("Login successful!");
+        // Don't set loading to false here - let navigation handle it
       } else {
         const { error } = await supabase.auth.signUp({
           email,
@@ -81,11 +77,11 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        toast.success("Account created successfully!");
+        toast.success("Account created! Setting up your profile...");
+        // Don't set loading to false here - let navigation handle it
       }
     } catch (error: any) {
       toast.error(error.message);
-    } finally {
       setLoading(false);
     }
   };
