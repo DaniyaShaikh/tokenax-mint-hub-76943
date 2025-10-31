@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
@@ -18,8 +19,11 @@ import {
   TrendingUp, 
   Calendar,
   PieChart,
-  BarChart3
+  BarChart3,
+  ShoppingCart
 } from "lucide-react";
+import { InvestDialog } from "./InvestDialog";
+import { useState } from "react";
 
 interface Investment {
   propertyId: string;
@@ -48,6 +52,8 @@ interface InvestmentDetailsDialogProps {
 }
 
 const InvestmentDetailsDialog = ({ open, onOpenChange, investment }: InvestmentDetailsDialogProps) => {
+  const [investDialogOpen, setInvestDialogOpen] = useState(false);
+  
   if (!investment) return null;
 
   const images = Array.isArray(investment.propertyImages) ? investment.propertyImages : [];
@@ -57,6 +63,23 @@ const InvestmentDetailsDialog = ({ open, onOpenChange, investment }: InvestmentD
   const userShareValue = (investment.propertyValuation * investment.userTokens) / investment.totalTokens;
   const profitLoss = userShareValue - investment.totalInvested;
   const roi = (profitLoss / investment.totalInvested) * 100;
+  const hasAvailableTokens = investment.availableTokens > 0;
+
+  // Format property for InvestDialog
+  const property = {
+    id: investment.propertyId,
+    title: investment.propertyTitle,
+    address: investment.propertyAddress,
+    valuation: investment.propertyValuation,
+    property_type: investment.propertyType,
+    property_images: investment.propertyImages,
+    description: "",
+    highlights: "",
+    property_tokens: [{
+      available_tokens: investment.availableTokens,
+      price_per_token: investment.pricePerToken
+    }]
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -226,22 +249,47 @@ const InvestmentDetailsDialog = ({ open, onOpenChange, investment }: InvestmentD
               </div>
 
               {/* Token Distribution */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-4 gap-4">
                 <div className="bg-muted/50 p-3 rounded-lg">
                   <p className="text-xs text-muted-foreground mb-1">Total Tokens</p>
                   <p className="text-lg font-semibold">{investment.totalTokens.toLocaleString()}</p>
                 </div>
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <p className="text-xs text-muted-foreground mb-1">Your Tokens</p>
+                <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                  <p className="text-xs text-green-700 mb-1">Tokens Sold</p>
+                  <p className="text-lg font-semibold text-green-700">{soldTokens.toLocaleString()}</p>
+                </div>
+                <div className="bg-primary/10 p-3 rounded-lg border border-primary/20">
+                  <p className="text-xs text-primary mb-1">Your Tokens</p>
                   <p className="text-lg font-semibold text-primary">{investment.userTokens.toLocaleString()}</p>
                 </div>
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <p className="text-xs text-muted-foreground mb-1">Token Value</p>
-                  <p className="text-lg font-semibold">
-                    {investment.pricePerToken.toLocaleString("en-US", { style: "currency", currency: "USD" })}
+                <div className={`p-3 rounded-lg border ${hasAvailableTokens ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
+                  <p className={`text-xs mb-1 ${hasAvailableTokens ? 'text-blue-700' : 'text-gray-500'}`}>Available</p>
+                  <p className={`text-lg font-semibold ${hasAvailableTokens ? 'text-blue-700' : 'text-gray-500'}`}>
+                    {investment.availableTokens.toLocaleString()}
                   </p>
                 </div>
               </div>
+
+              {/* Buy More Tokens Section */}
+              {hasAvailableTokens && (
+                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-semibold mb-1">Want to increase your investment?</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {investment.availableTokens.toLocaleString()} tokens available at{" "}
+                          {investment.pricePerToken.toLocaleString("en-US", { style: "currency", currency: "USD" })}/token
+                        </p>
+                      </div>
+                      <Button onClick={() => setInvestDialogOpen(true)} className="gap-2">
+                        <ShoppingCart className="h-4 w-4" />
+                        Buy More Tokens
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
 
@@ -333,6 +381,18 @@ const InvestmentDetailsDialog = ({ open, onOpenChange, investment }: InvestmentD
           </Card>
         </div>
       </DialogContent>
+
+      {/* Investment Dialog for buying more tokens */}
+      <InvestDialog
+        open={investDialogOpen}
+        onOpenChange={setInvestDialogOpen}
+        property={property}
+        onSuccess={() => {
+          setInvestDialogOpen(false);
+          // Optionally refresh the investment details
+          onOpenChange(false);
+        }}
+      />
     </Dialog>
   );
 };
