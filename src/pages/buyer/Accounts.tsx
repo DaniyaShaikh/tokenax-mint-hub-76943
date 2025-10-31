@@ -144,7 +144,7 @@ const Accounts = () => {
                   <div className="flex flex-col gap-1">
                     <CardTitle className="text-lg flex items-center gap-2">
                       <span className="text-2xl">{account.flag}</span>
-                      {account.currency} Account
+                      Account
                     </CardTitle>
                     <Badge variant="outline" className="w-fit text-xs">
                       Currency Account
