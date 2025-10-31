@@ -96,19 +96,52 @@ export const PropertyDetailsDialog = ({ propertyId, open, onOpenChange }: Proper
         return;
       }
 
-      const { data: propData } = await supabase
+      // Fetch property data
+      const { data: propData, error: propError } = await supabase
         .from("properties")
-        .select("*, property_tokens(*)")
+        .select("*")
         .eq("id", propertyId)
-        .single();
+        .maybeSingle();
 
-      const { data: purchaseData } = await supabase
+      if (propError) {
+        console.error("Error fetching property:", propError);
+        return;
+      }
+
+      if (!propData) {
+        console.error("Property not found");
+        return;
+      }
+
+      // Fetch property tokens separately
+      const { data: tokensData, error: tokensError } = await supabase
+        .from("property_tokens")
+        .select("*")
+        .eq("property_id", propertyId)
+        .maybeSingle();
+
+      if (tokensError) {
+        console.error("Error fetching tokens:", tokensError);
+      }
+
+      // Fetch purchase data
+      const { data: purchaseData, error: purchaseError } = await supabase
         .from("token_purchases")
         .select("*, profiles(full_name, email)")
         .eq("property_id", propertyId)
         .order("purchased_at", { ascending: false });
 
-      setProperty(propData);
+      if (purchaseError) {
+        console.error("Error fetching purchases:", purchaseError);
+      }
+
+      // Combine the data
+      const combinedData = {
+        ...propData,
+        property_tokens: tokensData ? [tokensData] : []
+      };
+
+      setProperty(combinedData);
       setPurchases(purchaseData || []);
     } catch (error) {
       console.error("Error loading property details:", error);
