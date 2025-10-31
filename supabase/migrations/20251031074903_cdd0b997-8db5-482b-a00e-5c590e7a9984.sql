@@ -1,0 +1,134 @@
+-- Update handle_new_user to include dummy purchases showing revenue
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
+DECLARE
+  is_admin_user BOOLEAN;
+  tokenized_property_id UUID;
+  property_counter INT := 0;
+BEGIN
+  -- Insert profile
+  INSERT INTO public.profiles (id, email, full_name, user_mode)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+    'buyer'
+  );
+  
+  -- Check if admin
+  is_admin_user := NEW.email = 'admin@tokenax.co';
+  
+  -- Assign role
+  IF is_admin_user THEN
+    INSERT INTO public.user_roles (user_id, role)
+    VALUES (NEW.id, 'admin');
+  ELSE
+    INSERT INTO public.user_roles (user_id, role)
+    VALUES (NEW.id, 'user');
+  END IF;
+  
+  -- Only add dummy data for non-admin users
+  IF NOT is_admin_user THEN
+    -- Create dummy properties for the user (as seller)
+    INSERT INTO properties (title, owner_id, address, property_type, description, valuation, status, property_images, expected_tokens)
+    VALUES 
+      (
+        'Luxury Penthouse Suite',
+        NEW.id,
+        '123 Skyline Boulevard, Manhattan, NY 10001',
+        'residential',
+        'Stunning penthouse with panoramic city views, featuring modern architecture and premium finishes',
+        3500000,
+        'tokenized',
+        '["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800"]',
+        35000
+      ),
+      (
+        'Modern Office Complex',
+        NEW.id,
+        '456 Business Park Drive, San Francisco, CA 94107',
+        'commercial',
+        'State-of-the-art commercial space in prime tech hub location',
+        8500000,
+        'tokenized',
+        '["https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800"]',
+        85000
+      ),
+      (
+        'Seaside Resort Villa',
+        NEW.id,
+        '789 Ocean Avenue, Miami Beach, FL 33139',
+        'residential',
+        'Exclusive beachfront property with private access and luxury amenities',
+        2750000,
+        'pending',
+        '["https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800"]',
+        27500
+      );
+
+    -- Create property tokens for tokenized properties and add dummy purchases
+    FOR tokenized_property_id IN 
+      SELECT id FROM properties 
+      WHERE owner_id = NEW.id 
+      AND status = 'tokenized'
+    LOOP
+      property_counter := property_counter + 1;
+      
+      -- Insert property tokens
+      INSERT INTO property_tokens (property_id, total_tokens, available_tokens, price_per_token)
+      SELECT 
+        tokenized_property_id,
+        p.expected_tokens,
+        p.expected_tokens - 1000,
+        p.valuation / p.expected_tokens
+      FROM properties p
+      WHERE p.id = tokenized_property_id;
+      
+      -- Add dummy purchases from existing users to show revenue
+      -- Get some existing buyers (excluding the new user)
+      INSERT INTO token_purchases (buyer_id, property_id, tokens_purchased, price_per_token, total_amount)
+      SELECT 
+        p.id as buyer_id,
+        tokenized_property_id,
+        CASE property_counter 
+          WHEN 1 THEN 500
+          ELSE 300
+        END as tokens_purchased,
+        pt.price_per_token,
+        CASE property_counter 
+          WHEN 1 THEN 500 * pt.price_per_token
+          ELSE 300 * pt.price_per_token
+        END as total_amount
+      FROM profiles p
+      CROSS JOIN property_tokens pt
+      WHERE pt.property_id = tokenized_property_id
+      AND p.id != NEW.id
+      AND p.user_mode = 'buyer'
+      ORDER BY p.created_at ASC
+      LIMIT 2
+      ON CONFLICT DO NOTHING;
+    END LOOP;
+
+    -- Create dummy investments for the user (as buyer)
+    INSERT INTO token_purchases (buyer_id, property_id, tokens_purchased, price_per_token, total_amount)
+    SELECT 
+      NEW.id,
+      pt.property_id,
+      500,
+      pt.price_per_token,
+      500 * pt.price_per_token
+    FROM property_tokens pt
+    JOIN properties p ON p.id = pt.property_id
+    WHERE p.owner_id != NEW.id
+    AND p.status = 'tokenized'
+    LIMIT 2
+    ON CONFLICT DO NOTHING;
+  END IF;
+  
+  RETURN NEW;
+END;
+$$;
