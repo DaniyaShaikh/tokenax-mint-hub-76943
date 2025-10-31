@@ -141,10 +141,15 @@ const Accounts = () => {
             <Card key={account.id} className="border-2">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <span className="text-2xl">{account.flag}</span>
-                    {account.currency} Account
-                  </CardTitle>
+                  <div className="flex flex-col gap-1">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <span className="text-2xl">{account.flag}</span>
+                      {account.currency} Account
+                    </CardTitle>
+                    <Badge variant="outline" className="w-fit text-xs">
+                      Currency Account
+                    </Badge>
+                  </div>
                   <Badge variant="secondary" className="bg-primary/10 text-primary">
                     {account.interest}% Interest
                   </Badge>
@@ -154,7 +159,6 @@ const Accounts = () => {
                 {/* Balance */}
                 <div>
                   <p className="text-4xl font-bold">
-                    {account.currency === "USD" ? "US" : ""}
                     {account.symbol}
                     {account.balance.toLocaleString("en-US", { 
                       minimumFractionDigits: 2,
