@@ -96,11 +96,11 @@ const PropertyListingDialog = ({ open, onOpenChange, onSuccess }: PropertyListin
       let documentUrls: string[] = [];
 
       if (imageFiles.length > 0) {
-        imageUrls = await uploadFiles(imageFiles, "kyc-documents", `property-images/${user.id}`);
+        imageUrls = await uploadFiles(imageFiles, "kyc-documents", `${user.id}/property-images`);
       }
 
       if (documentFiles.length > 0) {
-        documentUrls = await uploadFiles(documentFiles, "kyc-documents", `ownership-docs/${user.id}`);
+        documentUrls = await uploadFiles(documentFiles, "kyc-documents", `${user.id}/ownership-docs`);
       }
 
       // Insert property
