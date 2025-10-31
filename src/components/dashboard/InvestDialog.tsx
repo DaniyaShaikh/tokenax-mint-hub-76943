@@ -56,9 +56,8 @@ export const InvestDialog = ({ property, open, onOpenChange, onSuccess }: Invest
     setTokens(Math.max(1, Math.min(maxTokens, newTokens)));
   };
 
-  const setQuickAmount = (percentage: number) => {
-    const amount = Math.floor(maxTokens * percentage);
-    setTokens(Math.max(1, amount));
+  const setQuickAmount = (tokenAmount: number) => {
+    setTokens(Math.min(tokenAmount, maxTokens));
   };
 
   const handlePurchase = async () => {
@@ -177,26 +176,38 @@ export const InvestDialog = ({ property, open, onOpenChange, onSuccess }: Invest
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => setQuickAmount(0.25)}
-                  className="px-3"
+                  onClick={() => setQuickAmount(10)}
+                  className="px-3 min-w-[50px]"
+                  disabled={maxTokens < 10}
                 >
-                  25%
+                  10
                 </Button>
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => setQuickAmount(0.5)}
-                  className="px-3"
+                  onClick={() => setQuickAmount(25)}
+                  className="px-3 min-w-[50px]"
+                  disabled={maxTokens < 25}
                 >
-                  50%
+                  25
                 </Button>
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => setQuickAmount(1)}
-                  className="px-3"
+                  onClick={() => setQuickAmount(50)}
+                  className="px-3 min-w-[50px]"
+                  disabled={maxTokens < 50}
                 >
-                  Max
+                  50
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setQuickAmount(100)}
+                  className="px-3 min-w-[50px]"
+                  disabled={maxTokens < 100}
+                >
+                  100
                 </Button>
               </div>
             </div>
